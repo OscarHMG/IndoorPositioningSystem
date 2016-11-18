@@ -22,7 +22,7 @@ public class IdentificationActivity extends Activity{
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
+                Intent intent = new Intent(IdentificationActivity.this, WebViewMap.class);
                 startActivity(intent);
 
             }
