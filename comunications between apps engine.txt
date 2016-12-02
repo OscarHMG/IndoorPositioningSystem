@@ -1,0 +1,5 @@
+The only way to communicate between modules is via HTTP requests, synchronously via URL Fetch API or async via Push Queue API, which can only be done via *.appspot.com URLs. But this are always resolved to local IP address so inter-module communication always goes through internal AppEngine network.
+
+Also, the official docs about module communication uses ModuleService API which resolves module addresses to *.appspot.com addresses, so this is an official google way of addressing modules.
+
+You can share data between modules via datasore/memcache but I don't consider this communication as it does not actively notify receiving party about the data.
