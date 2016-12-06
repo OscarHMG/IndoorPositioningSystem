@@ -36,12 +36,14 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.google.android.gms:play-services:8.1.0'
     compile project(path: ':end-backend', configuration: 'android-endpoints')
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
     configurations {
-        all*.exclude group: 'org.apache.httpcomponents',module: 'httpclient'
+        all*.exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
 
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.google.android.gms:play-services:8.3.0'
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
+    compile project(path: ':backend', configuration: 'android-endpoints')
 }
