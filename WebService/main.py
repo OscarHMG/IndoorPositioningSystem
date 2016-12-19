@@ -1,5 +1,4 @@
-from flask import Flask
-import requests
+from flask import Flask, request
 import json
 import subscriber
 import publisher
@@ -10,7 +9,7 @@ app.config['DEBUG'] = True #True for local test
 TEST_TOPIC = 'navigator-location'  #testPositionServer  navigator-location testPositionServer
 TEST_SUBSCRIPTION = 'map-worker-sub' # map-worker-sub   python-visualizer  map-worker-dev pullDataPosition
 message = '{ "Username": "Sergio","Location": "mainstairs","Timestamp": "2016-12-18T15:29:05Z"}'
-message2 = '{ "Username": "Oscar","Location": "labproto","Timestamp": "2016-12-18T19:29:05Z"}'
+#message2 = '{ "Username": "Oscar","Location": "labproto","Timestamp": "2016-12-18T19:29:05Z"}'
 
 #Use for local test
 server_name="localhost"
@@ -29,21 +28,26 @@ def pull_message():
     resultado = subscriber.receive_message(TEST_TOPIC,TEST_SUBSCRIPTION).replace('\"','')
     return json.dumps(resultado)
 
-@app.route('/push_message')
+@app.route('/push_message',methods=['POST'])
 def push_message():
-    resultado = publisher.publish_message(TEST_TOPIC, message)
+    envelope = request.data.decode('utf-8') #\n\n
+    print envelope
+    
+    resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
     return json.dumps(resultado, indent=4)
 
-@app.route('/push_message2')
-def push_message2():
-    resultado = publisher.publish_message(TEST_TOPIC, message2)
-    return json.dumps(resultado, indent=4)
+#Local Test
+#@app.route('/push_message2')
+#def push_message2():
+ #   resultado = publisher.publish_message(TEST_TOPIC, message2)
+  #  return json.dumps(resultado, indent=4)
 
 
 @app.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
     return 'You are running this web server'
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -56,5 +60,5 @@ def page_not_found(e):
 if __name__ == '__main__':
 	app.run( 
 		host=server_name,
-		port=int("8070")
+		port=int("8074")
 	)

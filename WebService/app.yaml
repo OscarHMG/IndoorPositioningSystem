@@ -5,6 +5,9 @@ threadsafe: yes
 handlers:
 - url: .*
   script: main.app
+- url: /favicon.ico
+  static_files: static/images/Favicon.ico
+  upload: static/images/Favicon\.ico
 
 libraries:
 - name: jinja2
@@ -12,8 +15,10 @@ libraries:
 - name: markupsafe
   version: "0.15"
 
+#For localhost
 #env_variables:
  #   PUBSUB_TOPIC: navigator-location  #testPositionServer
     # This token is used to verify that requests originate from your
     # application. It can be any sufficiently random string.
-  #  PUBSUB_VERIFICATION_TOKEN: 1234abc
+ #   PUBSUB_VERIFICATION_TOKEN: 1234abc
+
