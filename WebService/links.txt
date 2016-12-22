@@ -1,0 +1,5 @@
+Videos y diapositivas:
+https://drive.google.com/open?id=0B3N0xokLoKdpX3ZWSHdfTnBSWXM
+
+Codigo fuente en github de la parte app(android) y el web server:
+https://github.com/OscarHMG/IndoorPositioningSystem

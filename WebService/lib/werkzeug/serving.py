@@ -562,7 +562,7 @@ def is_running_from_reloader():
 def run_simple(hostname, port, application, use_reloader=False,
                use_debugger=False, use_evalex=True,
                extra_files=None, reloader_interval=1,
-               reloader_type='auto', threaded=False,
+               reloader_type='auto', threaded=True,
                processes=1, request_handler=None, static_files=None,
                passthrough_errors=False, ssl_context=None):
     """Start a WSGI application. Optional features include a reloader,
@@ -673,7 +673,7 @@ def run_simple(hostname, port, application, use_reloader=False,
             # lose this ability.
             address_family = select_ip_version(hostname, port)
             s = socket.socket(address_family, socket.SOCK_STREAM)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 5)
             s.bind((hostname, port))
             if hasattr(s, 'set_inheritable'):
                 s.set_inheritable(True)

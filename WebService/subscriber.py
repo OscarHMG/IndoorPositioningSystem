@@ -21,7 +21,7 @@ at https://cloud.google.com/pubsub/docs.
 """
 
 import argparse
-
+import json
 from google.cloud import pubsub
 
 
@@ -63,24 +63,57 @@ def receive_message(topic_name, subscription_name):
     pubsub_client = pubsub.Client()
     topic = pubsub_client.topic(topic_name)
     subscription = topic.subscription(subscription_name)
-    formato=""
-
+    formato=[]
+    
     # Change return_immediately=False to block until messages are
     # received.
-    results = subscription.pull(return_immediately=True, max_messages=5,client=None)
+    results = subscription.pull(return_immediately=False, max_messages=4,client=None)
 
     print('Received {} messages.'.format(len(results)))
+    #print results
 
     for ack_id, message in results:
-        formato+=('['+('{}: {}'.format(message.message_id, message.data))+']')
+        #words = [w.replace('\"', '') for w in np.array(message.data).tolist()]
+        primero = {'messageId': message.message_id, 'data' : message.data }
+        formato.append(primero)
+        #formato=('{"messageId":'+('{}, "data" :[ {} ]'.format(message.message_id, message.data))+'}')
         #formato+=(' {}: {}, {}'.format(message.message_id, message.data, message.attributes))
-
+        #dic0.update(formato)
+    print formato
     # Acknowledge received messages. If you do not acknowledge, Pub/Sub will
     # redeliver the message.
     if results:
         print subscription.acknowledge([ack_id for ack_id, message in results])
 
-    return formato
+    return json.dumps(formato,sort_keys=True)
+
+def receive_message_fast(topic_name, subscription_name):
+    """Receives a message from a pull subscription."""
+    pubsub_client = pubsub.Client()
+    topic = pubsub_client.topic(topic_name)
+    subscription = topic.subscription(subscription_name)
+    formato=[]
+    
+    # Change return_immediately=False to block until messages are
+    # received.
+    results = subscription.pull(return_immediately=True, max_messages=1,client=None)
+
+    print('Received {} messages.'.format(len(results)))
+    #print results
+
+    for ack_id, message in results:
+        primero = {'messageId': message.message_id, 'data' : message.data }
+        formato.append(primero)
+        #formato=('{"messageId":'+('{}, "data" :[ {} ]'.format(message.message_id, message.data))+'}')
+        #formato+=(' {}: {}, {}'.format(message.message_id, message.data, message.attributes))
+        #dic0.update(formato)
+    print formato
+    # Acknowledge received messages. If you do not acknowledge, Pub/Sub will
+    # redeliver the message.
+    if results:
+        print subscription.acknowledge([ack_id for ack_id, message in results])
+
+    return json.dumps(formato,sort_keys=True)
     
 
 
