@@ -1,7 +1,53 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment"
-    android:name="com.oscarhmg.indoorpositioningsystem.IdentificationActivityFragment"
-    tools:layout="@layout/fragment_identification"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="86dp">
+
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:hint="Su nombre"
+            android:ems="10"
+            android:id="@+id/visitorName"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="60dp" />
+
+        <Spinner
+            android:id="@+id/prof_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            android:layout_below="@+id/textView"
+            android:layout_alignStart="@+id/visitorName"
+            android:layout_alignEnd="@+id/visitorName"
+            android:entries="@array/tmp_arrays" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aceptar"
+            android:id="@+id/submit"
+            android:layout_below="@+id/prof_spinner"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="A quien desea visitar?"
+            android:id="@+id/textView"
+            android:layout_below="@+id/visitorName"
+            android:layout_alignEnd="@+id/submit"
+            android:layout_marginTop="44dp" />
+
+    </RelativeLayout>
+</LinearLayout>

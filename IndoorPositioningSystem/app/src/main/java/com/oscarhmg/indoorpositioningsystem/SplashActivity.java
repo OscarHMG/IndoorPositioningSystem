@@ -34,17 +34,17 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkPermissions();
-        Intent intent = new Intent(this, MapActivity.class);
+        Intent intent = new Intent(this, IdentificationActivity.class);
         startActivity(intent);
         /*Intent intent = new Intent(this, IdentificationActivity.class);
         startActivity(intent);*/
         finish();
-        cliente = new HttpHandler();
+        /*cliente = new HttpHandler();
         String server = getResources().getString(R.string.serverFind);
         String response = cliente.request(server, JSONTest());
         String room = getLocation(response);
         Log.i("ROOM SPLASH:",room);
-        Log.i("Location SPLASH: ",getLntLong(room).toString());
+        Log.i("Location SPLASH: ",getLntLong(room).toString());*/
     }
 
     //THIS FUNCTIONS HAVE TO GO IN MAP

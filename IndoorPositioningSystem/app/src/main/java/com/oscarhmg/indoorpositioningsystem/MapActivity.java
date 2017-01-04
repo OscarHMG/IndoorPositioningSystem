@@ -199,7 +199,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         //mMap.addMarker(new MarkerOptions().position(test).title("Test"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cti, 20));
 
-        //setOverlayCTIMap();
+        setOverlayCTIMap();
         /*mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -213,7 +213,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     }
 
     public void setOverlayCTIMap(){
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.raw.map);
+        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.raw.copia);
         LatLng soutWest = new LatLng(-2.14611, -79.9493155);
         LatLng northEast = new LatLng(-2.14557, -79.948475);
         LatLngBounds latLngBounds = new LatLngBounds(soutWest,northEast);
@@ -275,12 +275,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                 tmp = r;
             }
         }
+        //Here locations are null sometimes.
         if(marker!= null){
             marker.remove();
             marker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }else{
             marker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }
+        marker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
 
     }
 

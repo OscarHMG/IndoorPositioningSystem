@@ -14,5 +14,5 @@
     <string name="userNameDefault">invitado</string>
     <string name="serverDefault">http://navigator-cloud.appspot.com/track</string>
     <string name="serverFind">http://104.154.240.176:18003/track</string>
-    <string name="groupDefault">test1</string>
+    <string name="groupDefault">test2</string>
 </resources>

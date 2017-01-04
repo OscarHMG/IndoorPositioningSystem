@@ -2,7 +2,6 @@ package com.oscarhmg.indoorpositioningsystem;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -10,31 +9,75 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
  * Created by user on 17/11/2016.
  */
 public class IdentificationActivity extends Activity{
-    private String userName;
-    private String server;
-    private String group;
-    private static final int PERMISSIONS = 0;
+    private EditText visitor;
+    private Spinner visited;
+    private Button submit;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_identification);
-        userName = (getResources().getString(R.string.userNameDefault));
-        server = (getResources().getString(R.string.serverDefault));
-        group = (getResources().getString(R.string.groupDefault));
         checkPermissions();
+        visitor = (EditText)findViewById(R.id.visitorName);
+        visited = (Spinner)findViewById(R.id.prof_spinner);
+        submit = (Button)findViewById(R.id.submit);
+        addItemsOnSpinner(visited);
+        visited.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String value = visited.getSelectedItem().toString();
+                Toast.makeText(IdentificationActivity.this,"Seleccionado: "+value,Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+    }
+
+    public void addItemsOnSpinner(Spinner visited) {
+
+        List<String> list = new ArrayList<String>();
+        list.add("Afghanistan");
+        list.add("Bangladesh");
+        list.add("Bhutan");
+        list.add("India");
+        list.add("Maldives");
+        list.add("Sri Lanka");
+        list.add("Nepal");
+        list.add("Pakistan");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        visited.setAdapter(dataAdapter);
     }
 
 
@@ -71,27 +114,4 @@ public class IdentificationActivity extends Activity{
         }
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
-    }
 }
