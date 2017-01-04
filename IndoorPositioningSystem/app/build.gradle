@@ -1,0 +1,63 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+    dexOptions {
+        //incremental = true;
+        preDexLibraries = false
+        javaMaxHeapSize "6g" // 2g should be also OK
+    }
+    defaultConfig {
+        applicationId "com.oscarhmg.indoorpositioningsystem"
+        minSdkVersion 21
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/services/io.grpc.ManagedChannelProvider'
+    }
+}
+
+dependencies {
+    provided  fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:multidex:1.0.1'
+
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile('com.google.android.gms:play-services:8.1.0') {
+        exclude group: 'com.google.common.annotations'
+        exclude module: 'play-services-appstate';
+    }
+    /*compile(project(path: ':end-backend', configuration: 'android-endpoints')) {
+        exclude(module: 'guava-jdk5')
+    }*/
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
+    //compile group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '0.4.0'
+    /*compile('com.google.cloud:google-cloud-pubsub:0.4.0') {/*{
+        exclude group: 'com.google.cloud',module:'protobuf';
+         exclude module: 'common'
+        exclude group: 'com.google.api-client', module: 'google-api-client-appengine'
+    }*/
+    configurations {
+        all*.exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+        //all*.exclude module: 'protobuf-java'
+        //all*.exclude group: 'com.google.common', module: 'annotations'
+        //all*.exclude group: 'com.google.api-client', module: 'google-api-client-appengine'
+    }
+}
