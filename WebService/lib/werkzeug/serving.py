@@ -76,7 +76,7 @@ from werkzeug.urls import url_parse, url_unquote
 from werkzeug.exceptions import InternalServerError
 
 
-LISTEN_QUEUE = 128
+LISTEN_QUEUE = 256
 can_open_by_fd = hasattr(socket, 'fromfd')
 
 
@@ -446,8 +446,8 @@ def select_ip_version(host, port):
 class BaseWSGIServer(HTTPServer, object):
 
     """Simple single-threaded, single-process WSGI server."""
-    multithread = False
-    multiprocess = False
+    multithread = True
+    multiprocess = True
     request_queue_size = LISTEN_QUEUE
 
     def __init__(self, host, port, app, handler=None,
@@ -530,7 +530,7 @@ class ForkingWSGIServer(ForkingMixIn, BaseWSGIServer):
         self.max_children = processes
 
 
-def make_server(host=None, port=None, app=None, threaded=False, processes=1,
+def make_server(host=None, port=None, app=None, threaded=True, processes=1,
                 request_handler=None, passthrough_errors=False,
                 ssl_context=None, fd=None):
     """Create a new server instance that is either threaded, or forks
@@ -561,7 +561,7 @@ def is_running_from_reloader():
 
 def run_simple(hostname, port, application, use_reloader=False,
                use_debugger=False, use_evalex=True,
-               extra_files=None, reloader_interval=1,
+               extra_files=None, reloader_interval=2,
                reloader_type='auto', threaded=True,
                processes=1, request_handler=None, static_files=None,
                passthrough_errors=False, ssl_context=None):
@@ -673,7 +673,7 @@ def run_simple(hostname, port, application, use_reloader=False,
             # lose this ability.
             address_family = select_ip_version(hostname, port)
             s = socket.socket(address_family, socket.SOCK_STREAM)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 5)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 10)
             s.bind((hostname, port))
             if hasattr(s, 'set_inheritable'):
                 s.set_inheritable(True)

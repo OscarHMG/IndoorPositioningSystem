@@ -22,6 +22,7 @@ at https://cloud.google.com/pubsub/docs.
 
 import argparse
 import json
+from google.cloud.pubsub.subscription import AutoAck
 from google.cloud import pubsub
 
 
@@ -64,10 +65,21 @@ def receive_message(topic_name, subscription_name):
     topic = pubsub_client.topic(topic_name)
     subscription = topic.subscription(subscription_name)
     formato=[]
+
     
+    #with AutoAck(subscription, max_messages=5) as ack:
+    #    for ack_id, message in list(ack.items()):
+     #       try:
+    #            primero = {'messageId': message.message_id, 'data' : message.data }
+    #            formato.append(primero)
+    #        except Exception:  # pylint: disable=broad-except
+    #            del ack[ack_id]
+    #            formato={"Not Found"}
     # Change return_immediately=False to block until messages are
     # received.
-    results = subscription.pull(return_immediately=False, max_messages=4,client=None)
+    results = subscription.pull( return_immediately=False, max_messages=5, client=None)
+    #results = subscription.pull( max_messages=5)
+
 
     print('Received {} messages.'.format(len(results)))
     #print results
@@ -76,9 +88,7 @@ def receive_message(topic_name, subscription_name):
         #words = [w.replace('\"', '') for w in np.array(message.data).tolist()]
         primero = {'messageId': message.message_id, 'data' : message.data }
         formato.append(primero)
-        #formato=('{"messageId":'+('{}, "data" :[ {} ]'.format(message.message_id, message.data))+'}')
-        #formato+=(' {}: {}, {}'.format(message.message_id, message.data, message.attributes))
-        #dic0.update(formato)
+
     print formato
     # Acknowledge received messages. If you do not acknowledge, Pub/Sub will
     # redeliver the message.

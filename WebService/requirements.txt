@@ -8,3 +8,6 @@ Flask==0.10
 google-cloud-pubsub==0.22.0
 gunicorn==19.6.0
 oauth2client==4.0.0
+networkx==1.11
+decorator==4.0.10
+numpy==1.11.3
