@@ -29,7 +29,7 @@ public class IdentificationActivity extends Activity{
     private EditText visitor;
     private Spinner visited;
     private Button submit;
-
+    private String visitedName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +43,7 @@ public class IdentificationActivity extends Activity{
         visited.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String value = visited.getSelectedItem().toString();
-                Toast.makeText(IdentificationActivity.this,"Seleccionado: "+value,Toast.LENGTH_LONG).show();
+                visitedName = visited.getSelectedItem().toString();
             }
 
             @Override
@@ -55,8 +54,19 @@ public class IdentificationActivity extends Activity{
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
-                startActivity(intent);
+                String tmp = (String)visitor.getText().toString();
+                Log.i("LOL: ",tmp);
+                if((visitor.getText().toString())!=null && visitedName!=null){
+                    Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
+                    startActivity(intent);
+                }else{
+                    if(visitor.getText() ==null){
+                        Toast.makeText(IdentificationActivity.this,"Ingrese su nombre para identificarse",Toast.LENGTH_LONG);
+                    }else if(visitedName == null){
+                        Toast.makeText(IdentificationActivity.this,"No existen personas en el edificio",Toast.LENGTH_LONG);
+                    }
+                }
+
             }
         });
 
@@ -66,14 +76,10 @@ public class IdentificationActivity extends Activity{
     public void addItemsOnSpinner(Spinner visited) {
 
         List<String> list = new ArrayList<String>();
-        list.add("Afghanistan");
-        list.add("Bangladesh");
-        list.add("Bhutan");
-        list.add("India");
-        list.add("Maldives");
-        list.add("Sri Lanka");
-        list.add("Nepal");
-        list.add("Pakistan");
+        list.add("Sergio Moncayo");
+        list.add("Dr. Federico Dominguez");
+        list.add("Oscar Moncayo");
+        list.add("Marco Polo");
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

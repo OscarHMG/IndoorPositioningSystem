@@ -14,6 +14,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.ParcelUuid;
 import android.support.v4.app.FragmentActivity;
@@ -34,6 +35,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.oscarhmg.indoorpositioningsystem.room.Room;
 import com.oscarhmg.indoorpositioningsystem.room.RoomsCTI;
 
@@ -72,7 +75,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     final private long interval = 2050;
     final private long wait = 950;
     private LatLng actualUbication;
-    Marker marker;
+    private Marker marker;
+    private Polyline path;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +156,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         if (scanner != null) {
             scanner.startScan(scanFilters, SCAN_SETTINGS, scanCallback);
             Log.i("Process:", "SCANNING");
+
         }
     }
 
@@ -282,12 +287,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         }else{
             marker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }
+        drawPath(tmp.getCoordinates());
         marker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
 
     }
 
     public void EnviarDatos(){
-        onResume();
+        //onResume();
         if ((time_Send + interval) < System.currentTimeMillis()) {
             if (CargarDatos()) {
                 String response = cliente.request(_Server, toJSON());
@@ -312,18 +318,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
 
     private boolean CargarDatos() {
         _User = (getResources().getString(R.string.userNameDefault));
-        _Server =(getResources().getString(R.string.serverFind));
+        _Server =(getResources().getString(R.string.serverDefault));
         _Group = (getResources().getString(R.string.groupDefault));
         if (_User == null || _Server == null  || _Group ==null)
             return false;
         return true;
     }
+
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
             if (resultCode == Activity.RESULT_OK) {
-                //initScanners();
+                initScanners();
             } else {
                 this.finish();
             }
@@ -368,4 +377,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                 }).show();
     }
 
+
+    public void drawPath(LatLng visited) {
+        //-2.145835029709358),-79.9487455934286
+        if (path !=null)
+            path.remove();
+        path = mMap.addPolyline(new PolylineOptions()
+                .add(visited, new LatLng(-2.145835029709358, -79.9487455934286))
+                .width(5)
+                .color(Color.RED));
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        scanner.stopScan(scanCallback);
+    }
 }

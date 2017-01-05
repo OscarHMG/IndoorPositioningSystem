@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,74 +28,32 @@ import java.util.Arrays;
  */
 public class SplashActivity extends Activity {
     HttpHandler cliente;
-
+    private int SPLASH_TIME_OUT = 3000;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkPermissions();
-        Intent intent = new Intent(this, IdentificationActivity.class);
-        startActivity(intent);
-        /*Intent intent = new Intent(this, IdentificationActivity.class);
-        startActivity(intent);*/
-        finish();
-        /*cliente = new HttpHandler();
-        String server = getResources().getString(R.string.serverFind);
-        String response = cliente.request(server, JSONTest());
-        String room = getLocation(response);
-        Log.i("ROOM SPLASH:",room);
-        Log.i("Location SPLASH: ",getLntLong(room).toString());*/
-    }
+        new Handler().postDelayed(new Runnable() {
 
-    //THIS FUNCTIONS HAVE TO GO IN MAP
+            /*
+             * Showing splash screen with a timer. This will be useful when you
+             * want to show case your app logo / company
+             */
 
-    public String JSONTest(){
-        JSONObject jsonObject= new JSONObject();
-        ArrayList<JBeacon> arrayJBeacons = new ArrayList<>();
-        String group = getResources().getString(R.string.groupDefault);
-        String user = getResources().getString(R.string.userNameDefault);
-        try {
-            jsonObject.put("group", group);
-            jsonObject.put("username", user);
-            JBeacon jb = new JBeacon();
-            jb.setAddress("E1:D6:C9:98:5F:B0");
-            jb.setRssi(-30);
-            JBeacon jb1 = new JBeacon();
-            jb1.setAddress("E4:44:68:44:23:40");
-            jb1.setRssi(-90);
-            arrayJBeacons.add(jb);
-            arrayJBeacons.add(jb1);
-            jsonObject.put("wifi-fingerprint",new JSONArray(arrayJBeacons.toString()));
+            @Override
+            public void run() {
+                // This method will be executed once the timer is over
+                // Start your app main activity
+                Intent i = new Intent(SplashActivity.this, IdentificationActivity.class);
+                startActivity(i);
 
-            return jsonObject.toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public String getLocation(String stringResult){
-        String location = null;
-        try {
-            JSONObject jsonObject = new JSONObject(stringResult);
-            location = jsonObject.getString("location");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return location;
-    }
-
-    public LatLng getLntLong(String location){
-        Room tmp = null;
-        for(Room r: RoomsCTI.rooms){
-            if(r.getNickName().equals(location)){
-                tmp = r;
+                // close this activity
+                finish();
             }
-        }
-        return tmp.getCoordinates();
+        }, SPLASH_TIME_OUT);
     }
-
 
     public void checkPermissions(){
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==

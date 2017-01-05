@@ -2,4 +2,10 @@
 <resources>
     <color name="gray">#444440</color>
     <color name="white">#ffff</color>
+    <color name="customBlackGray">#5c676d</color>
+    <color name="customLightGray">#ebebeb</color>
+    <color name="GreenMonteCarl">#7bc4ae</color>
+    <color name="customOrange">#eead81</color>
+    <color name="shadowGray">#f9f9f9</color>
+    <color name="hintColorEditText">#cccccc</color>
 </resources>

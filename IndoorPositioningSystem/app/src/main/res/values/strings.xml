@@ -1,18 +1,11 @@
 <resources>
-    <string name="app_name">IndoorPositioningSystem</string>
+    <string name="app_name">Indoor Positioning System</string>
     <string name="title_activity_map">Map</string>
-    <string-array name="tmp_arrays">
-        <item>Malaysia</item>
-        <item>United States</item>
-        <item>Indonesia</item>
-        <item>France</item>
-        <item>Italy</item>
-        <item>Singapore</item>
-        <item>New Zealand</item>
-        <item>India</item>
-    </string-array>
     <string name="userNameDefault">invitado</string>
     <string name="serverDefault">http://navigator-cloud.appspot.com/track</string>
     <string name="serverFind">http://104.154.240.176:18003/track</string>
     <string name="groupDefault">test2</string>
+    <string name="spinnerViewText">¿A quién desea visitar?</string>
+    <string name="visitorEditText">Nombres</string>
+    <string name="submitButton">Aceptar</string>
 </resources>
