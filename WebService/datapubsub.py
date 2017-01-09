@@ -3,7 +3,7 @@ import subscriber
 import json
 
 TEST_TOPIC = 'navigator-location'  #testPositionServer  navigator-location testPositionServer
-TEST_SUBSCRIPTION = 'map-worker-sub' # map-worker-sub   map-worker-dev pullDataPosition
+TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev pullDataPosition
 
 def get_data_filter(invitado):
     #invi = invitado
