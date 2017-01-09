@@ -8,4 +8,5 @@
     <string name="spinnerViewText">¿A quién desea visitar?</string>
     <string name="visitorEditText">Nombres</string>
     <string name="submitButton">Aceptar</string>
+    <string name="pubSub">https://testpositionserver-dot-navigator-cloud.appspot.com/get_shortest_path</string>
 </resources>

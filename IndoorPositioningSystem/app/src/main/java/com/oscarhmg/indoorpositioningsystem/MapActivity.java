@@ -44,6 +44,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,7 +79,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     private LatLng actualUbication;
     private Marker marker;
     private Polyline path;
-
+    private HttpHandler requestDijkstra;
+    private ArrayList <Polyline> polylines;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +102,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     }
 
     public void prepareScanners(){
+        polylines = new ArrayList<>();
         cliente = new HttpHandler(); //To send data to the server.
+        requestDijkstra = new HttpHandler();
         time_Send = System.currentTimeMillis();
         initScanners(); //init();
         scanFilters = new ArrayList<>();
@@ -287,8 +292,49 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         }else{
             marker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }
-        drawPath(tmp.getCoordinates());
+        //Here make the request to get the shortest path and get the JSON
+        //String acd = requestDijkstra.request("https://testpositionserver-dot-navigator-cloud.appspot.com/get_shortest_path",requestSorthestPathJSON(tmp.getNickName(),"labihm"));
+        //Get the points and use "drawPath"
+        String x = null;
+        ArrayList<LatLng> ubications = null;
+        try {
+            x = requestDijkstra.requestJSONPubSub(tmp.getNickName(),"labihm");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if(x ==null){
+            Log.i("Error"," NUlo");
+        }else{
+            //Log.i("DIJKSTRA: ", "" + x.toString());
+            ubications = getDataFromJson(x);
+        }
+        //
+        drawPath(ubications);
         marker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
+
+    }
+
+    public ArrayList getDataFromJson(String msg){
+        ArrayList<LatLng> tmp = new ArrayList<>();
+        try {
+            JSONArray jsonArr = new JSONArray(msg);
+            for(int i = 0; i < jsonArr.length(); i++){
+                JSONArray jsonObj = jsonArr.getJSONArray(i);
+                JSONArray positions =  jsonObj.getJSONArray(0);
+                JSONArray filter = positions.getJSONArray(1);
+
+                Double x = (Double) filter.get(0);
+                Double y = (Double) filter.get(1);
+                LatLng ubication = new LatLng((Double)filter.get(0),(Double)filter.get(1));
+                tmp.add(ubication);
+                System.out.println("LEYENDO:  -----("+x+","+y+")");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return tmp;
 
     }
 
@@ -302,7 +348,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                 String room = getLocation(response);
                 if(room!=null){ //Succesfull
                     Log.i("ROOM UBICATION: ", room);
-                    getLntLong(room);
+                    getLntLong(room); // Ubico el punto.
                 }
             }
             try { //deja de escanear por un intervalo de tiempo
@@ -361,6 +407,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
             return null;
         }
     }
+
+
     private void logErrorAndShowToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         Log.e(TAG, message);
@@ -378,14 +426,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     }
 
 
-    public void drawPath(LatLng visited) {
+    public void drawPath(ArrayList<LatLng> ubications) {
         //-2.145835029709358),-79.9487455934286
-        if (path !=null)
-            path.remove();
-        path = mMap.addPolyline(new PolylineOptions()
-                .add(visited, new LatLng(-2.145835029709358, -79.9487455934286))
-                .width(5)
-                .color(Color.RED));
+        if (polylines.size()>0)
+            polylines.clear();
+        for (int i = 0; i < ubications.size() - 1; i++) {
+
+                 Polyline line = mMap.addPolyline(new PolylineOptions()
+                        .add(ubications.get(i), ubications.get(i + 1))
+                        .width(5)
+                        .color(Color.RED));
+                polylines.add(line);
+            }
     }
 
     @Override
