@@ -65,7 +65,6 @@ def receive_message(topic_name, subscription_name):
     topic = pubsub_client.topic(topic_name)
     subscription = topic.subscription(subscription_name)
     formato=[]
-
     
     #with AutoAck(subscription, max_messages=5) as ack:
     #    for ack_id, message in list(ack.items()):

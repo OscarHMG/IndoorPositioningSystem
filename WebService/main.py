@@ -10,18 +10,16 @@ import graphsMethods
 app = Flask(__name__)
 
 
-app.config['DEBUG'] = True #True for local test
+app.config['DEBUG'] = False #True for local test
 
 
 #Global Variables:
 TEST_TOPIC = 'navigator-location'  #testPositionServer  navigator-location testPositionServer
 TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev pull_messages_serverhttp
 #message = '{ "Username": "Sergio","Location": "mainstairs","Timestamp": "2016-12-18T15:29:05Z"}'
-#message2 = '{ "Username": "Oscar","Location": "labproto","Timestamp": "2016-12-18T19:29:05Z"}'
-Grafo = nx.Graph()
 
 #Use for local test
-server_name="localhost"
+#server_name="localhost"
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
@@ -34,8 +32,6 @@ server_name="localhost"
 def get_shortest_path():
     envelope = request.data.decode('utf-8')
     print envelope
-    Grafo = graphsMethods.read_json_file_graph('graphCTI.json')
-    #ver = nx.dijkstra_path(Grafo,0,18)
     resultado = graphsMethods.shortest_path(envelope,'graphCTI.json') 
     return   resultado  #json.dumps(nx.dijkstra_path(Grafo,30,18))
 
@@ -43,11 +39,6 @@ def get_shortest_path():
 @app.route('/pull_message')
 def pull_message():
     #url = 'https://api.github.com/users/runnable'
-    # this issues a GET to the url. replace "get" with "post", "head",
-    # "put", "patch"... to make a request using a different method
-    #r = requests.get(url)
-    # return json.dumps(r.json(), indent=4)
-    #words = [w.replace('[br]', '<br />') for w in words]
     resultado = subscriber.receive_message(TEST_TOPIC,TEST_SUBSCRIPTION)#.replace('\"','\'')
     return resultado#resultado #json.dumps(resultado)
 
@@ -57,6 +48,7 @@ def pull_message_fast():
     resultado = subscriber.receive_message_fast(TEST_TOPIC,TEST_SUBSCRIPTION)#.replace('\"','')
     return  resultado #resultado #json.dumps(resultado)
 
+#Get the properties of the graph
 @app.route('/get_current_graph')
 def get_current_graph():
     resultado =   graphsMethods.read_json_file('graphCTI.json') #graphIncompleteCTI  graphCTI.json 
@@ -76,7 +68,7 @@ def push_message():
 @app.route('/find_visitor',methods=['POST'])
 def find_visitor():
     #envelope = json.loads(request.data)#\n\n
-    envelope = request.data
+    envelope = request.data.decode('utf-8')
     #print envelope
     resultado = datapubsub.get_data_filter(envelope)
     #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
@@ -87,9 +79,6 @@ def find_visitor():
 def page_not_found(e):
     """Return a custom 404 error."""
     return 'Sorry, nothing at this URL.', 404
-#def push_message2():
- #   resultado = publisher.publish_message(TEST_TOPIC, message2)
-  #  return json.dumps(resultado, indent=4)
 
 
 @app.route('/')
@@ -101,8 +90,8 @@ def hello():
 
 #Using for local development
 #Comment this lines when deploy this app in the Google Cloud
-if __name__ == '__main__':
-	app.run( 
-		host=server_name,
-		port=int("8075")
-	)
+# if __name__ == '__main__':
+# 	app.run( 
+# 		host=server_name,
+# 		port=int("8075")
+# 	)
