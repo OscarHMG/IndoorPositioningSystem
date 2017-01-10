@@ -81,6 +81,7 @@ public final class RoomsCTI {
         tmpRooms.add(LEFT_STAIRS);
         tmpRooms.add(MEETING);
         tmpRooms.add(SECRETARY);
+        tmpRooms.add(DOMO);
         return tmpRooms;
     }
 

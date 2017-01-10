@@ -21,6 +21,8 @@ public class BeaconArrayAdapter extends ArrayAdapter<Beacon> implements Filterab
         this.filteredBeacons = allBeacons;
     }
 
+
+
     @Override
     public int getCount() {
         return filteredBeacons.size();

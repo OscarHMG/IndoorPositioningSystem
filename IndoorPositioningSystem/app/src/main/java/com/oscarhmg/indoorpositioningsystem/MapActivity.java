@@ -77,7 +77,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     final private long interval = 2050;
     final private long wait = 950;
     private LatLng actualUbication;
-    private Marker marker;
+    private Marker visitorMarker;
     private Polyline path;
     private HttpHandler requestDijkstra;
     private ArrayList <Polyline> polylines;
@@ -87,6 +87,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         setContentView(R.layout.activity_map);
         prepareMap();
         prepareScanners();
+        //CargarDatos();
+
+        //new AsyncScanBeacons(this,_User,_Server,_Group,mMap).execute();
 
     }
 
@@ -102,6 +105,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     }
 
     public void prepareScanners(){
+        //Primero en un metodo inicializo todo, y luego ejecuto el hilo asyncorinico
         polylines = new ArrayList<>();
         cliente = new HttpHandler(); //To send data to the server.
         requestDijkstra = new HttpHandler();
@@ -109,6 +113,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         initScanners(); //init();
         scanFilters = new ArrayList<>();
         scanFilters.add(new ScanFilter.Builder().setServiceUuid(EDDYSTONE_SERVICE_UUID).build());
+        //
         arrayAdapter = new BeaconArrayAdapter(this, R.layout.beacon_list_item, new ArrayList<Beacon>());
         scanCallback = new ScanCallback() {
             @Override
@@ -127,7 +132,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                     arrayAdapter.add(new Beacon(result.getDevice().getAddress(), result.getRssi()));
 
                 Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
-                EnviarDatos();
+                //EnviarDatos();
+                new AsyncTaskHttpHandler().execute(arrayAdapter,mMap);
                 return;
             }
 
@@ -158,10 +164,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+        //initScanners();
         if (scanner != null) {
             scanner.startScan(scanFilters, SCAN_SETTINGS, scanCallback);
             Log.i("Process:", "SCANNING");
-
+        }else{
+            Log.i("Process:","ERROR, NOT SCANNING");
         }
     }
 
@@ -260,7 +268,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
             showFinishingAlertDialog("Bluetooth Error", "Bluetooth not detected on device");
         } else if (!btAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            this.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+
         } else {
             scanner = btAdapter.getBluetoothLeScanner();
         }
@@ -286,11 +295,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
             }
         }
         //Here locations are null sometimes.
-        if(marker!= null){
-            marker.remove();
-            marker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
+        if(visitorMarker!= null){
+            visitorMarker.remove();
+            visitorMarker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }else{
-            marker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
+            visitorMarker = mMap.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }
         //Here make the request to get the shortest path and get the JSON
         //String acd = requestDijkstra.request("https://testpositionserver-dot-navigator-cloud.appspot.com/get_shortest_path",requestSorthestPathJSON(tmp.getNickName(),"labihm"));
@@ -312,7 +321,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         }
         //
         drawPath(ubications);
-        marker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
+        visitorMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
 
     }
 
@@ -335,7 +344,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
             e.printStackTrace();
         }
         return tmp;
-
     }
 
     public void EnviarDatos(){
@@ -346,6 +354,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                 //Here take the response and take the location
                 Log.i("DATOS RESPONSE: ",response);
                 String room = getLocation(response);
+                Toast.makeText(this,"Room: "+room,Toast.LENGTH_SHORT).show();
                 if(room!=null){ //Succesfull
                     Log.i("ROOM UBICATION: ", room);
                     getLntLong(room); // Ubico el punto.
@@ -429,16 +438,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     public void drawPath(ArrayList<LatLng> ubications) {
         //-2.145835029709358),-79.9487455934286
         if (polylines.size()>0)
-            polylines.clear();
+            deletePath();
         for (int i = 0; i < ubications.size() - 1; i++) {
-
-                 Polyline line = mMap.addPolyline(new PolylineOptions()
-                        .add(ubications.get(i), ubications.get(i + 1))
-                        .width(5)
-                        .color(Color.RED));
-                polylines.add(line);
+            polylines.add(mMap.addPolyline(new PolylineOptions()
+                    .add(ubications.get(i), ubications.get(i + 1))
+                    .width(5)
+                    .color(Color.RED)));
             }
     }
+
+    public void deletePath(){
+        for(Polyline line : polylines) {
+            line.remove();
+        }
+        polylines.clear();
+    }
+
+
 
     @Override
     public void onBackPressed() {
