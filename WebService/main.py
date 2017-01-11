@@ -9,14 +9,16 @@ import graphsMethods
 
 app = Flask(__name__)
 
+MESSAGE=[]
 
-app.config['DEBUG'] = False #True for local test
+app.config['DEBUG'] = True #True for local test
 
 
 #Global Variables:
 TEST_TOPIC = 'navigator-location'  #testPositionServer  navigator-location testPositionServer
 TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev pull_messages_serverhttp
-#message = '{ "Username": "Sergio","Location": "mainstairs","Timestamp": "2016-12-18T15:29:05Z"}'
+#message = '{ "Username": "Sergio Moncayo","Location": "labproto","Timestamp": "2017-01-18T15:29:05Z"}'
+# { "Username": "Xavier Pionce","Location": "labihm","Timestamp": "2017-01-16T15:29:05Z"}
 
 #Use for local test
 #server_name="localhost"
@@ -72,7 +74,7 @@ def find_visitor():
     #print envelope
     resultado = datapubsub.get_data_filter(envelope)
     #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
-    return json.dumps(resultado)
+    return  resultado #json.dumps(resultado)
 
 
 @app.errorhandler(404)
@@ -93,5 +95,5 @@ def hello():
 # if __name__ == '__main__':
 # 	app.run( 
 # 		host=server_name,
-# 		port=int("8075")
+# 		port=int("8073")
 # 	)
