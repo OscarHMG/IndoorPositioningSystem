@@ -33,6 +33,11 @@
             android:name=".IdentificationActivity"
             android:label="Identificacion" >
         </activity>
+
+        <activity
+            android:name=".ActionActivity"
+            android:label="@string/app_name" >
+        </activity>
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme" >

@@ -10,13 +10,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
+import com.oscarhmg.indoorpositioningsystem.room.Room;
+import com.oscarhmg.indoorpositioningsystem.room.RoomsCTI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,12 +25,13 @@ import java.util.List;
 /**
  * Created by user on 17/11/2016.
  */
-public class IdentificationActivity extends Activity{
+public class IdentificationActivity extends Activity implements View.OnClickListener {
     private EditText visitor;
     private Spinner visited;
     private Button submit;
     private String visitedName;
-
+    private int operation;
+    ArrayList <String> data;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,46 +41,51 @@ public class IdentificationActivity extends Activity{
         visited = (Spinner)findViewById(R.id.prof_spinner);
         submit = (Button)findViewById(R.id.submit);
         addItemsOnSpinner(visited);
-        visited.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                visitedName = visited.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String tmp = (String)visitor.getText().toString();
-                Log.i("LOL: ",tmp);
-                if((visitor.getText().toString())!=null && visitedName!=null){
-                    Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
-                    startActivity(intent);
-                }else{
-                    if(visitor.getText() ==null){
-                        Toast.makeText(IdentificationActivity.this,"Ingrese su nombre para identificarse",Toast.LENGTH_LONG);
-                    }else if(visitedName == null){
-                        Toast.makeText(IdentificationActivity.this,"No existen personas en el edificio",Toast.LENGTH_LONG);
-                    }
-                }
-
-            }
-        });
+        submit.setOnClickListener(this);
 
 
     }
 
-    public void addItemsOnSpinner(Spinner visited) {
+    public ArrayList getDataByUserAction(){
+        ArrayList <String> data = null;
+        Intent intent=getIntent();
+        Bundle extras =intent.getExtras();
+        operation = (int) extras.get("action");
+        Log.i("Operation :", "" + operation);
+        switch (operation){
+            case 1:
+                data = getLivePersons();
+                break;
+            case 2:
+                data = getRooms();
+                break;
+            default:
+                break;
+        }
+        return data;
+    }
 
-        List<String> list = new ArrayList<String>();
-        list.add("Sergio Moncayo");
-        list.add("Dr. Federico Dominguez");
-        list.add("Oscar Moncayo");
-        list.add("Marco Polo");
+    private ArrayList<String> getLivePersons() {
+        HttpHandler request = new HttpHandler();
+        String response = request.requestOnlinePersons();
+
+        return null;
+    }
+
+
+
+    public ArrayList getRooms(){
+        ArrayList<String> rooms = new ArrayList<>();
+        for(Room r: RoomsCTI.rooms){
+            String data = r.getNameRoom();
+            rooms.add(data);
+        }
+        return rooms;
+    }
+
+
+    public void addItemsOnSpinner(Spinner visited) {
+        List<String> list = getDataByUserAction();
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -120,4 +126,24 @@ public class IdentificationActivity extends Activity{
         }
     }
 
+    @Override
+    public void onClick(View view) {
+        visitedName = visited.getSelectedItem().toString();
+        String tmp = (String)visitor.getText().toString();
+        if(tmp!=null && visitedName!=null){
+            Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
+            intent.putExtra("option", visitedName);
+            intent.putExtra("operation",operation);
+            intent.putExtra("visitorName", tmp);
+            Toast.makeText(IdentificationActivity.this,"Opcion escogida:"+visitedName,Toast.LENGTH_LONG).show();
+            startActivity(intent);
+            this.finish();
+        }else{
+            if(visitor.getText() ==null){
+                Toast.makeText(IdentificationActivity.this,"Ingrese su nombre para identificarse",Toast.LENGTH_LONG);
+            }else if(visitedName == null){
+                Toast.makeText(IdentificationActivity.this,"No existen personas en el edificio",Toast.LENGTH_LONG);
+            }
+        }
+    }
 }

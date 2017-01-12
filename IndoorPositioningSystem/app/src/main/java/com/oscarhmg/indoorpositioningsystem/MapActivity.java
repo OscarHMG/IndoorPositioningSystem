@@ -81,15 +81,24 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     private Polyline path;
     private HttpHandler requestDijkstra;
     private ArrayList <Polyline> polylines;
+    private  int operation;
+    private String optionSelected;
+    private AsyncTaskHttpHandler asyncTaskThreadh;
+    private String visitorName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        Intent intent=getIntent();
+        Bundle extras =intent.getExtras();
+        operation = (int) extras.get("operation");
+        optionSelected = (String)extras.get("option");
+        visitorName = (String)extras.get("visitorName");
+        Log.i("Antes del mapa:",""+operation+","+optionSelected);
         prepareMap();
         prepareScanners();
-        //CargarDatos();
 
-        //new AsyncScanBeacons(this,_User,_Server,_Group,mMap).execute();
+
 
     }
 
@@ -114,6 +123,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         scanFilters = new ArrayList<>();
         scanFilters.add(new ScanFilter.Builder().setServiceUuid(EDDYSTONE_SERVICE_UUID).build());
         //
+
         arrayAdapter = new BeaconArrayAdapter(this, R.layout.beacon_list_item, new ArrayList<Beacon>());
         scanCallback = new ScanCallback() {
             @Override
@@ -133,9 +143,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
 
                 Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
                 //EnviarDatos();
-                new AsyncTaskHttpHandler().execute(arrayAdapter,mMap);
+                Log.i("Enviar Datos: ",""+optionSelected);
+                asyncTaskThreadh = (AsyncTaskHttpHandler) new AsyncTaskHttpHandler(MapActivity.this).execute(arrayAdapter,mMap,operation,optionSelected,visitorName);
                 return;
             }
+
 
             @Override
             public void onScanFailed(int errorCode) {
@@ -157,6 +169,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                         break;
                 }
             }
+
+            @Override
+            public void onBatchScanResults(List<ScanResult> results) {
+                super.onBatchScanResults(results);
+            }
         };
     }
 
@@ -164,7 +181,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-        //initScanners();
         if (scanner != null) {
             scanner.startScan(scanFilters, SCAN_SETTINGS, scanCallback);
             Log.i("Process:", "SCANNING");
@@ -460,5 +476,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     public void onBackPressed() {
         super.onBackPressed();
         scanner.stopScan(scanCallback);
+        asyncTaskThreadh.cancel(true);
+        this.finish();
+
+
     }
 }

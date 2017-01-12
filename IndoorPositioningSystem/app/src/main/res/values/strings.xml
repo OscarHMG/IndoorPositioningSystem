@@ -9,4 +9,8 @@
     <string name="visitorEditText">Nombres</string>
     <string name="submitButton">Aceptar</string>
     <string name="pubSub">https://testpositionserver-dot-navigator-cloud.appspot.com/get_shortest_path</string>
+    <string name="message">Bienvenido, ¿Qué deseas hacer?</string>
+    <string name="radioButtonVisitedRoom">Deseo explorar el CTI</string>
+    <string name="radioButtonVisitedPerson">Estoy buscando a alguien en particular</string>
+    <string name="next">Siguiente ></string>
 </resources>

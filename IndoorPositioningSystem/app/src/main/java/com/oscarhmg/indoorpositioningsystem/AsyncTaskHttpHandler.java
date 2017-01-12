@@ -1,5 +1,6 @@
 package com.oscarhmg.indoorpositioningsystem;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -37,45 +38,102 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
     private BeaconArrayAdapter arrayAdapter;
     private GoogleMap map;
     private static Marker visitorMarker;
+    private static Marker visitedMarker;
     private ArrayList <LatLng>ubications = new ArrayList();
     private static ArrayList <Polyline> polylines = new ArrayList<>();
+    private String visitorName;
+    private Activity activityMap;
 
+    public AsyncTaskHttpHandler(Activity activityMap) {
+        this.activityMap = activityMap;
+    }
 
     @Override
     protected ArrayList<Object> doInBackground(Object... params) {
-        ArrayList<Object> result= new ArrayList<>();
+        ArrayList<Object> result = new ArrayList<>();
         arrayAdapter = (BeaconArrayAdapter) params[0];
         map = (GoogleMap) params[1];
-        //visitorMarker = (Marker) params[2];
-        cliente = new HttpHandler();
-        Room visitor = EnviarDatos();
-        result.add(visitor);
-        //get Visited point
-        Room visited =  new Room("Human Computer Interaction Lab", new LatLng((-2.1457268114567625),-79.94881600141525),"labihm");
-        //get the path (Json GET)
-        if(visitor!= null && visited!=null){
-            getRequestPath(visitor,visited);
-        }
+        int operation = (int) params[2];
+        String optionSelected = (String) params[3];
+        visitorName = (String)params[4];
+       if(!isCancelled() && arrayAdapter.getCount()!=0) {
 
+           cliente = new HttpHandler();
+           Log.i("Task Op:", "" + operation);
+           Log.i("Option Selected:", "" + optionSelected);
+           Room visitor = EnviarDatos();
+           result.add(visitor);
+           //get Visited point
+           Room visited = doOperation(operation, optionSelected);
+           //Room visited =  new Room("Human Computer Interaction Lab", new LatLng((-2.1457268114567625),-79.94881600141525),"labihm");
+           //get the path (Json GET)
+           result.add(visited);
+           if (visitor != null && visited != null) {
+               //Get the ubications to follow and later draw the path in postExecute method
+               getRequestPath(visitor, visited);
+           }
+
+       }else{
+           return null;
+       }
         return result;
+
     }
 
     @Override
     protected void onPostExecute(ArrayList<Object> objects) {
         super.onPostExecute(objects);
-        Room myPoint = (Room) objects.get(0);
+        //this.cancel(true);
 
-        if(myPoint!=null) {
+        if (objects != null) {
+            Room myPoint = (Room) objects.get(0);
+            Room visitedPoint = (Room)objects.get(1);
+            if(myPoint.equals(visitedPoint)){
+                Toast.makeText(activityMap,"Ha llegado a su destino!",Toast.LENGTH_LONG).show();
+                activityMap.finish();
+            }
             if (visitorMarker != null)
                 visitorMarker.remove();
             visitorMarker = map.addMarker(new MarkerOptions().position(myPoint.getCoordinates()));
             visitorMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
+            if(visitedMarker!=null)
+                visitedMarker.remove();
+            visitedMarker = map.addMarker(new MarkerOptions().position(visitedPoint.getCoordinates()));
+            visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visited));
         }
-        //visitorMarker = map.addMarker(new MarkerOptions().position(myPoint));
-        //Then draw marker of visited
-        //Now draw path
-        drawPath();
 
+            //visitorMarker = map.addMarker(new MarkerOptions().position(myPoint));
+            //Then draw marker of visited
+            //Now draw path
+        drawPath();
+        this.cancel(true);
+    }
+        //this.cancel(true);
+
+
+    public Room doOperation(int operation, String optionSelected){
+        switch (operation){
+            case 1:
+                break;
+            case 2:
+                return getRoomByName(optionSelected);
+        }
+
+
+        return null;
+    }
+
+
+    public Room getRoomByName(String name){
+        Room room = null;
+        for(Room r : RoomsCTI.rooms){
+            if(r.getNameRoom().equals(name)){
+                room = r;
+            }
+
+        }
+        Log.i("Room:",""+room.getNickName());
+        return room;
     }
 
     private boolean CargarDatos() {
@@ -120,7 +178,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
 
         try {
             jsonObject.put("group", _Group);
-            jsonObject.put("username", _User);
+            jsonObject.put("username", visitorName);
 
             for (int x = 0; x < arrayAdapter.getCount(); x++) {
                 JBeacon jb = new JBeacon();
@@ -130,7 +188,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
             }
             arrayAdapter.clear();
             jsonObject.put("wifi-fingerprint", new JSONArray(arrayJBeacons.toString()));
-            //Log.i("JSON TO SEND",""+jsonObject.toString());
+            Log.i("JSON TO SEND", "" + jsonObject.toString());
             return jsonObject.toString();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -190,7 +248,6 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
                 JSONArray jsonObj = jsonArr.getJSONArray(i);
                 JSONArray positions =  jsonObj.getJSONArray(0);
                 JSONArray filter = positions.getJSONArray(1);
-
                 Double x = (Double) filter.get(0);
                 Double y = (Double) filter.get(1);
                 LatLng ubication = new LatLng((Double)filter.get(0),(Double)filter.get(1));
