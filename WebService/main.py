@@ -18,10 +18,12 @@ app.config['DEBUG'] = True #True for local test
 TEST_TOPIC = 'navigator-location'  #testPositionServer  navigator-location testPositionServer
 TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev pull_messages_serverhttp
 #message = '{ "Username": "Sergio Moncayo","Location": "labproto","Timestamp": "2017-01-18T15:29:05Z"}'
-# { "Username": "Xavier Pionce","Location": "labihm","Timestamp": "2017-01-16T15:29:05Z"}
+bandera = 0
+
+# { "username": "Xavier Pionce","location": "labihm","timestamp": "2017-01-12T17:14:05Z"}
 
 #Use for local test
-#server_name="localhost"
+server_name="localhost"
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
@@ -40,9 +42,19 @@ def get_shortest_path():
 #Get the message of 4 message available on the pubsub
 @app.route('/pull_message')
 def pull_message():
+    global MESSAGE
     #url = 'https://api.github.com/users/runnable'
-    resultado = subscriber.receive_message(TEST_TOPIC,TEST_SUBSCRIPTION)#.replace('\"','\'')
-    return resultado#resultado #json.dumps(resultado)
+    #resultado = subscriber.receive_message(TEST_TOPIC,TEST_SUBSCRIPTION)
+    resultado = datapubsub.pull_message_data()
+    if datapubsub.is_empty(resultado):
+        print "No se guarda"
+    else:
+        MESSAGE.append(resultado)
+
+    # with open('dataSource.json', 'w') as outfile:
+    #     json.dump(MESSAGE, outfile)
+
+    return  json.dumps(MESSAGE)  #resultado #json.dumps(resultado)
 
 #Get the last message available on the pubsub
 @app.route('/pull_message_fast')
@@ -60,15 +72,48 @@ def get_current_graph():
 #Return if is successfull return the ack otherwise return a empty response
 @app.route('/push_message',methods=['POST'])
 def push_message():
+    global MESSAGE
+    lista_nueva = []
+    global bandera 
     envelope = request.data.decode('utf-8') #\n\n
     print envelope
-    
-    resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
-    return json.dumps(resultado, indent=4)
+    data_publish = datapubsub.pubsub_push(envelope)
+    #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
+    if datapubsub.is_empty(data_publish):
+        return "Not Found"
+    else:
+        #MESSAGE.append(data_publish)
+        if datapubsub.is_empty(MESSAGE):
+            #default_data.update({'item3': 3})
+            MESSAGE.append(data_publish)
+            print "Mensaje: ", MESSAGE
+        else:
+            lista_nueva = MESSAGE[:]
+      
+            if datapubsub.contains_item(data_publish,lista_nueva):
+                print "Old item"
+                data_publish = datapubsub.pubsub_push(envelope)
+                for index, item in enumerate(lista_nueva):
+                    #print "Ver mensaje: ", item['username']
+                    print "tratado: ", data_publish['username']
+                    if item['username'] == data_publish['username']:
+                        lista_nueva.pop(index)
+                        lista_nueva.insert(index,data_publish)
+                        #lista_nueva[lista_nueva.index(item)]=data_publish
+                
+                print "Ver mensaje: ", lista_nueva
+            else:
+                print "new item"
+                lista_nueva.insert(0, data_publish)
+
+            MESSAGE = lista_nueva[:]
+        
+    return json.dumps(MESSAGE, indent=4)
 
 #Return a json of the location of the user, if the user never find return 'Not found'
 @app.route('/find_visitor',methods=['POST'])
 def find_visitor():
+    global MESSAGE
     #envelope = json.loads(request.data)#\n\n
     envelope = request.data.decode('utf-8')
     #print envelope
@@ -90,10 +135,10 @@ def hello():
 
 
 
-#Using for local development
-#Comment this lines when deploy this app in the Google Cloud
-# if __name__ == '__main__':
-# 	app.run( 
-# 		host=server_name,
-# 		port=int("8073")
-# 	)
+# Using for local development
+# Comment this lines when deploy this app in the Google Cloud
+if __name__ == '__main__':
+	app.run( 
+		host=server_name,
+		port=int("8076")
+	)

@@ -76,7 +76,7 @@ def receive_message(topic_name, subscription_name):
     #            formato={"Not Found"}
     # Change return_immediately=False to block until messages are
     # received.
-    results = subscription.pull( return_immediately=False, max_messages=10, client=None)
+    results = subscription.pull( return_immediately=False, max_messages=6, client=None)
     #results = subscription.pull( max_messages=5)
 
 
@@ -105,15 +105,14 @@ def receive_message_fast(topic_name, subscription_name):
     
     # Change return_immediately=False to block until messages are
     # received.
-    results = subscription.pull(return_immediately=True, max_messages=1,client=None)
+    results = subscription.pull(return_immediately=True)
 
     print('Received {} messages.'.format(len(results)))
     #print results
 
     for ack_id, message in results:
         data = json.loads(message.data)
-        primero = {'messageId': message.message_id, 'data' : data }
-        #print primero
+        primero = {'messageId': message.message_id, 'data' : data}
         formato.append(primero)
         #formato=('{"messageId":'+('{}, "data" :[ {} ]'.format(message.message_id, message.data))+'}')
         #formato+=(' {}: {}, {}'.format(message.message_id, message.data, message.attributes))
