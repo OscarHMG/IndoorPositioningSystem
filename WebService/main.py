@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 MESSAGE=[]
 
-app.config['DEBUG'] = True #True for local test
+app.config['DEBUG'] = False #True for local test
 
 
 #Global Variables:
@@ -23,7 +23,7 @@ bandera = 0
 # { "username": "Xavier Pionce","location": "labihm","timestamp": "2017-01-12T17:14:05Z"}
 
 #Use for local test
-server_name="localhost"
+#server_name="localhost"
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
@@ -137,8 +137,8 @@ def hello():
 
 # Using for local development
 # Comment this lines when deploy this app in the Google Cloud
-if __name__ == '__main__':
-	app.run( 
-		host=server_name,
-		port=int("8076")
-	)
+# if __name__ == '__main__':
+# 	app.run( 
+# 		host=server_name,
+# 		port=int("8076")
+# 	)
