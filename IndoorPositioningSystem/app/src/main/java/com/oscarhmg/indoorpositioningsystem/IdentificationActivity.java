@@ -67,9 +67,13 @@ public class IdentificationActivity extends Activity implements View.OnClickList
 
     private ArrayList<String> getLivePersons() {
         HttpHandler request = new HttpHandler();
-        String response = request.requestOnlinePersons();
+        //String response = request.requestOnlinePersons();
+        ArrayList<String> persons = new ArrayList<>();
+        persons.add("Oscar");
+        persons.add("Sergio Moncayo");
+        persons.add("fer");
 
-        return null;
+        return persons;
     }
 
 

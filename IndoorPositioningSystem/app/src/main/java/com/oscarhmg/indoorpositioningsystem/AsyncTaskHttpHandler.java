@@ -39,10 +39,12 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
     private GoogleMap map;
     private static Marker visitorMarker;
     private static Marker visitedMarker;
-    private ArrayList <LatLng>ubications = new ArrayList();
+    private static ArrayList <LatLng>ubications = new ArrayList();
     private static ArrayList <Polyline> polylines = new ArrayList<>();
     private String visitorName;
     private Activity activityMap;
+    private static Room tmpVisitor,tmpVisited;
+    private int operation;
 
     public AsyncTaskHttpHandler(Activity activityMap) {
         this.activityMap = activityMap;
@@ -53,27 +55,24 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         ArrayList<Object> result = new ArrayList<>();
         arrayAdapter = (BeaconArrayAdapter) params[0];
         map = (GoogleMap) params[1];
-        int operation = (int) params[2];
+        operation = (int) params[2];
         String optionSelected = (String) params[3];
         visitorName = (String)params[4];
        if(!isCancelled() && arrayAdapter.getCount()!=0) {
-
            cliente = new HttpHandler();
-           Log.i("Task Op:", "" + operation);
-           Log.i("Option Selected:", "" + optionSelected);
            Room visitor = EnviarDatos();
-           result.add(visitor);
-           //get Visited point
+           //Room visitor = new Room("Hall", new LatLng((-2.14588796618926),-79.94867786765099),"pasilloproto1");
            Room visited = doOperation(operation, optionSelected);
-           //Room visited =  new Room("Human Computer Interaction Lab", new LatLng((-2.1457268114567625),-79.94881600141525),"labihm");
-           //get the path (Json GET)
+
+           result.add(visitor);
            result.add(visited);
-           if (visitor != null && visited != null) {
+           getRequestPath(visitor, visited);
+           /*if (visitor != null && visited != null) {
                //Get the ubications to follow and later draw the path in postExecute method
                getRequestPath(visitor, visited);
-           }
-
+           }*/
        }else{
+           this.cancel(true);
            return null;
        }
         return result;
@@ -88,10 +87,6 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         if (objects != null) {
             Room myPoint = (Room) objects.get(0);
             Room visitedPoint = (Room)objects.get(1);
-            if(myPoint.equals(visitedPoint)){
-                Toast.makeText(activityMap,"Ha llegado a su destino!",Toast.LENGTH_LONG).show();
-                activityMap.finish();
-            }
             if (visitorMarker != null)
                 visitorMarker.remove();
             visitorMarker = map.addMarker(new MarkerOptions().position(myPoint.getCoordinates()));
@@ -99,7 +94,12 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
             if(visitedMarker!=null)
                 visitedMarker.remove();
             visitedMarker = map.addMarker(new MarkerOptions().position(visitedPoint.getCoordinates()));
-            visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visited));
+            if(operation==1){
+                visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visited));
+            }else{
+                visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.room));
+            }
+
         }
 
             //visitorMarker = map.addMarker(new MarkerOptions().position(myPoint));
@@ -112,14 +112,21 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
 
 
     public Room doOperation(int operation, String optionSelected){
+        Log.i("operation selected",optionSelected);
         switch (operation){
             case 1:
-                break;
+                if(optionSelected.equals("Oscar")){
+                    return new Room("Rapid Prototyping Lab", new LatLng((-2.145940902667342),-79.94867417961359),"labproto");
+                }
+                if(optionSelected.equals("Sergio Moncayo")){
+                    return new Room("Hall", new LatLng((-2.14588796618926),-79.94867786765099),"pasilloproto1");
+                }
+                if(optionSelected.equals("fer")){
+                    return new Room("Lounge", new LatLng((-2.145801190566184),-79.94862053543329),"salaespera");
+                }
             case 2:
                 return getRoomByName(optionSelected);
         }
-
-
         return null;
     }
 
@@ -132,7 +139,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
             }
 
         }
-        Log.i("Room:",""+room.getNickName());
+        //Log.i("Room:",""+room.getNickName());
         return room;
     }
 
@@ -151,6 +158,8 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         if ((time_Send + interval) < System.currentTimeMillis()) {
             if (CargarDatos()) {
                 String response = cliente.request(_Server, toJSON());
+                //HttpHandler requestPush = new HttpHandler();
+                //requestPush.requestOnlinePersons(publish);
                 //Here take the response and take the location
                 Log.i("DATOS RESPONSE: ", response);
                 String room = getLocation(response);
@@ -171,6 +180,16 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         return roomVisitor;
     }
 
+    public JSONObject buildJSON(String response){
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(response);
+            jsonObject.put("username",visitorName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
 
     private String toJSON() {
         JSONObject jsonObject = new JSONObject();
@@ -220,7 +239,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
 
     public void getRequestPath(Room visitor, Room visited){
         String jsonResponseDijsktra = null;
-        ubications = new ArrayList();
+        ubications.clear();
         try {
             HttpHandler requestDijkstra = new HttpHandler();
             jsonResponseDijsktra = requestDijkstra.requestJSONPubSub(visitor.getNickName(),visited.getNickName());
@@ -232,8 +251,9 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         if(jsonResponseDijsktra ==null){
             Log.i("Error"," NUlo");
         }else{
-            //Log.i("DIJKSTRA: ", "" + x.toString());
+            Log.i("DIJKSTRA: ", "" + jsonResponseDijsktra.toString());
             ubications = getShortestPathFromJSON(jsonResponseDijsktra);
+
         }
         //
         //drawPath(ubications);
@@ -263,13 +283,16 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
 
     public void drawPath() {
         //-2.145835029709358),-79.9487455934286
-        if (polylines.size()>0)
+        if (polylines.size()>0){
             deletePath();
-        for (int i = 0; i < ubications.size() - 1; i++) {
-            polylines.add(map.addPolyline(new PolylineOptions()
-                    .add(ubications.get(i), ubications.get(i + 1))
-                    .width(5)
-                    .color(Color.RED)));
+        }
+        if(ubications.size()>=2) {
+            for (int i = 0; i < ubications.size() - 1; i++) {
+                polylines.add(map.addPolyline(new PolylineOptions()
+                        .add(ubications.get(i), ubications.get(i + 1))
+                        .width(5)
+                        .color(Color.RED)));
+            }
         }
     }
 
