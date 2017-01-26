@@ -12,22 +12,16 @@ COUNT = 0
 COUNT_MESSAGE=0
 candado = 0
 candado_message = True
-founded = {}
 messages_pulling=[] #[{"data": {"Location": "labihm", "Timestamp": "2017-01-16T15:29:05Z", "Username": "Xavier Pionce"}, "messageId": "105504316449790"}]
 
-def get_data_filter(invitado):
+def get_data_filter(invitado,listado):
     global COUNT
     global candado
     global DATE_NOW
-    global founded
+    founded = {}
 
     load_data = json.loads(invitado) # load json object
-    datasuscriber = subscriber.receive_message(TEST_TOPIC,TEST_SUBSCRIPTION) # load the messages available
-    dataSource= json.loads(datasuscriber) #convert the messages in json object
-    delta_time= timedelta(days=COUNT)
-    current_date = DATE_NOW + delta_time
-    date_time = current_date.strftime('%Y-%m-%d')
-    print "FECHA: ", date_time
+    load_listado = listado[:]
 
     #{"visitante":"Sergio"}
     print "--------Visitante: "
@@ -35,45 +29,19 @@ def get_data_filter(invitado):
     print "-----------------"
     #print dataSource
 
-
-    user={}
-
-    print "dataSource: ",dataSource
-
-    if  is_empty(dataSource):
-         candado=1
-         user = {'Message':'Not Found'}
+    if(is_empty(load_listado)):
+      founded = {"Mensaje": "Lista Vacia"}
     else:
-        candado=0
-
-        for eachJsonObject in dataSource:
-            print "Data values: ",eachJsonObject['data'].values()
-            if (load_data['visitante'] in eachJsonObject['data'].values()) and candado==0:
-                 user  = (eachJsonObject['data']) # get the item
-                 founded = json.dumps(user)
-                 print "-----USER:"
-                 print user
-                 break
+        for index, item in enumerate(load_listado):
+            print "Ver mensaje: ", item['username']
+            if item['username'] == load_data['visitante']:
+                print "encontrado"
+                founded = item
+                return json.dumps(founded)
             else:
-                 candado = 1
+                founded = {"Mensaje":"Not Found"}
 
-            # for k,v in eachJsonObject['data'].iteritems():
-            #     if v.startswith(date_time):
-            #         candado=0
-
-    if candado != 0:
-        print "Fecha pasada a la actual"
-        COUNT+= 1
-        user = {'Message':'Not Found'}
-        founded = json.dumps(user)
-        if COUNT < MAX:
-            get_data_filter(json.dumps(load_data))
-        else:
-            COUNT=0
-    else:
-        print "Fecha es de hoy o mayor"
-
-    return founded
+    return json.dumps(founded)
 
 
 def pubsub_push(mensaje):
@@ -93,8 +61,6 @@ def pubsub_push(mensaje):
 
     return founded
 
-
-    
 
 
 def pull_message_data():

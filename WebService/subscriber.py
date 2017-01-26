@@ -117,7 +117,7 @@ def receive_message_fast(topic_name, subscription_name):
         #formato=('{"messageId":'+('{}, "data" :[ {} ]'.format(message.message_id, message.data))+'}')
         #formato+=(' {}: {}, {}'.format(message.message_id, message.data, message.attributes))
         #dic0.update(formato)
-    print formato
+    #print formato
     # Acknowledge received messages. If you do not acknowledge, Pub/Sub will
     # redeliver the message.
     if results:
