@@ -1,6 +1,7 @@
 from flask import Flask, request
 import json
 import networkx as nx
+from google.cloud import pubsub
 from networkx.readwrite import json_graph
 import subscriber
 import publisher
@@ -10,6 +11,7 @@ import graphsMethods
 app = Flask(__name__)
 
 MESSAGE=[]
+#MESSAGE_PUBLISHED=[]
 
 app.config['DEBUG'] = False #True for local test
 
@@ -18,7 +20,6 @@ app.config['DEBUG'] = False #True for local test
 TEST_TOPIC = 'navigator-location'  #testPositionServer  navigator-location testPositionServer
 TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev pull_messages_serverhttp
 #message = '{ "Username": "Sergio Moncayo","Location": "labproto","Timestamp": "2017-01-18T15:29:05Z"}'
-bandera = 0
 
 # { "username": "Xavier Pionce","location": "labihm","timestamp": "2017-01-12T17:14:05Z"}
 
@@ -42,19 +43,19 @@ def get_shortest_path():
 #Get the message of 4 message available on the pubsub
 @app.route('/pull_message')
 def pull_message():
-    global MESSAGE
+    mensaje = []
     #url = 'https://api.github.com/users/runnable'
     #resultado = subscriber.receive_message(TEST_TOPIC,TEST_SUBSCRIPTION)
     resultado = datapubsub.pull_message_data()
     if datapubsub.is_empty(resultado):
         print "No se guarda"
     else:
-        MESSAGE.append(resultado)
+        mensaje.append(resultado)
 
     # with open('dataSource.json', 'w') as outfile:
     #     json.dump(MESSAGE, outfile)
 
-    return  json.dumps(MESSAGE)  #resultado #json.dumps(resultado)
+    return  json.dumps(mensaje)  #resultado #json.dumps(resultado)
 
 #Get the last message available on the pubsub
 @app.route('/pull_message_fast')
@@ -69,6 +70,7 @@ def get_current_graph():
     #dictionary=  json.dumps(resultado)
     return resultado
 
+
 #Return if is successfull return the ack otherwise return a empty response
 @app.route('/push_message',methods=['POST'])
 def push_message():
@@ -82,7 +84,12 @@ def push_message():
     if datapubsub.is_empty(data_publish):
         return "Not Found"
     else:
-        #MESSAGE.append(data_publish)
+        ps = pubsub.Client()
+        topic = ps.topic(TEST_TOPIC)
+        topic.publish(json.dumps(data_publish).encode('utf-8'))
+
+        #print "Data recieved: ", subscriber.receive_message_fast(TEST_TOPIC,TEST_SUBSCRIPTION)
+
         if datapubsub.is_empty(MESSAGE):
             #default_data.update({'item3': 3})
             MESSAGE.append(data_publish)
@@ -114,10 +121,11 @@ def push_message():
 @app.route('/find_visitor',methods=['POST'])
 def find_visitor():
     global MESSAGE
+    listado = MESSAGE[:]
     #envelope = json.loads(request.data)#\n\n
     envelope = request.data.decode('utf-8')
     #print envelope
-    resultado = datapubsub.get_data_filter(envelope)
+    resultado = datapubsub.get_data_filter(envelope,listado)
     #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
     return  resultado #json.dumps(resultado)
 
@@ -130,6 +138,7 @@ def page_not_found(e):
 
 @app.route('/')
 def hello():
+
     """Return a friendly HTTP greeting."""
     return 'You are running this api rest web server'
 
@@ -140,5 +149,5 @@ def hello():
 # if __name__ == '__main__':
 # 	app.run( 
 # 		host=server_name,
-# 		port=int("8076")
+# 		port=int("8070")
 # 	)
