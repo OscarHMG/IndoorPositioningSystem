@@ -2,7 +2,7 @@
     <string name="app_name">Indoor Positioning System</string>
     <string name="title_activity_map">Map</string>
     <string name="userNameDefault">App Android</string>
-    <string name="serverDefault">http://navigator-cloud.appspot.com/track</string>
+    <string name="serverDefault">http://200.126.23.144:49160/track</string>
     <string name="serverFind">http://104.154.240.176:18003/track</string>
     <string name="groupDefault">test1</string>
     <string name="spinnerViewText">¿A quién desea visitar?</string>

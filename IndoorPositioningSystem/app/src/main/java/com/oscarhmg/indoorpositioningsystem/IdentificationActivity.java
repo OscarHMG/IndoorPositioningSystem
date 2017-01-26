@@ -17,6 +17,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import com.oscarhmg.indoorpositioningsystem.room.Room;
 import com.oscarhmg.indoorpositioningsystem.room.RoomsCTI;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,15 +71,17 @@ public class IdentificationActivity extends Activity implements View.OnClickList
     }
 
     private ArrayList<String> getLivePersons() {
-        HttpHandler request = new HttpHandler();
-        //String response = request.requestOnlinePersons();
-        ArrayList<String> persons = new ArrayList<>();
+        /*HttpHandler request = new HttpHandler();
+        /*String response = request.getRequestOnlinePeople("https://testpositionserver-dot-navigator-cloud.appspot.com/find_online_people");
+        /*ArrayList<String> persons = new ArrayList<>();
         persons.add("Oscar");
         persons.add("Sergio Moncayo");
-        persons.add("fer");
-
-        return persons;
+        persons.add("fer");*/
+        AsyncTaskHttpRequestOnlinePeople task = new AsyncTaskHttpRequestOnlinePeople();
+        task.execute();
+        return task.getPersons();
     }
+
 
 
 

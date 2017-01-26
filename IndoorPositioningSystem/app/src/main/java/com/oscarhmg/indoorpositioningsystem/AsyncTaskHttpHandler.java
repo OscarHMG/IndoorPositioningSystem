@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -45,6 +43,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
     private Activity activityMap;
     private static Room tmpVisitor,tmpVisited;
     private int operation;
+    private String response;
 
     public AsyncTaskHttpHandler(Activity activityMap) {
         this.activityMap = activityMap;
@@ -145,7 +144,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
 
     private boolean CargarDatos() {
         _User = "AppAndroid";
-        _Server = "http://navigator-cloud.appspot.com/track";
+        _Server = "http://200.126.23.144:49160/track";
         _Group = "test1";
         if (_User == null || _Server == null || _Group == null)
             return false;
@@ -157,9 +156,9 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         Room roomVisitor = null;
         if ((time_Send + interval) < System.currentTimeMillis()) {
             if (CargarDatos()) {
-                String response = cliente.request(_Server, toJSON());
-                //HttpHandler requestPush = new HttpHandler();
-                //requestPush.requestOnlinePersons(publish);
+                response = cliente.request(_Server, toJSON());
+                HttpHandler requestPush = new HttpHandler();
+                requestPush.pushToHistoryPeople(buildJSONToPOST(response),_Server);
                 //Here take the response and take the location
                 Log.i("DATOS RESPONSE: ", response);
                 String room = getLocation(response);
@@ -177,14 +176,17 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
             }
             time_Send = System.currentTimeMillis();
         }
+
+
         return roomVisitor;
     }
 
-    public JSONObject buildJSON(String response){
+    public JSONObject buildJSONToPOST(String response){
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(response);
             jsonObject.put("username",visitorName);
+            Log.i("PUSH SERGIO:",""+jsonObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
