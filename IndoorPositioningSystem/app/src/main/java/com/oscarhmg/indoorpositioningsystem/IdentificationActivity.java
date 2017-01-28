@@ -30,16 +30,19 @@ import java.util.List;
 /**
  * Created by user on 17/11/2016.
  */
-public class IdentificationActivity extends Activity implements View.OnClickListener {
+public class IdentificationActivity extends Activity implements View.OnClickListener,ReturnData{
     private EditText visitor;
     private Spinner visited;
     private Button submit;
     private String visitedName;
     private int operation;
     ArrayList <String> data;
+    ArrayAdapter<String> dataAdapter;
+    AsyncTaskHttpRequestOnlinePeople task = new AsyncTaskHttpRequestOnlinePeople();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        task.returnData = this;
         setContentView(R.layout.activity_identification);
         checkPermissions();
         visitor = (EditText)findViewById(R.id.visitorName);
@@ -52,7 +55,7 @@ public class IdentificationActivity extends Activity implements View.OnClickList
     }
 
     public ArrayList getDataByUserAction(){
-        ArrayList <String> data = null;
+        ArrayList <String> data = new ArrayList<>();
         Intent intent=getIntent();
         Bundle extras =intent.getExtras();
         operation = (int) extras.get("action");
@@ -71,15 +74,9 @@ public class IdentificationActivity extends Activity implements View.OnClickList
     }
 
     private ArrayList<String> getLivePersons() {
-        /*HttpHandler request = new HttpHandler();
-        /*String response = request.getRequestOnlinePeople("https://testpositionserver-dot-navigator-cloud.appspot.com/find_online_people");
-        /*ArrayList<String> persons = new ArrayList<>();
-        persons.add("Oscar");
-        persons.add("Sergio Moncayo");
-        persons.add("fer");*/
         AsyncTaskHttpRequestOnlinePeople task = new AsyncTaskHttpRequestOnlinePeople();
         task.execute();
-        return task.getPersons();
+        return new ArrayList<>();
     }
 
 
@@ -97,7 +94,7 @@ public class IdentificationActivity extends Activity implements View.OnClickList
 
     public void addItemsOnSpinner(Spinner visited) {
         List<String> list = getDataByUserAction();
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+        dataAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         visited.setAdapter(dataAdapter);
@@ -156,5 +153,11 @@ public class IdentificationActivity extends Activity implements View.OnClickList
                 Toast.makeText(IdentificationActivity.this,"No existen personas en el edificio",Toast.LENGTH_LONG);
             }
         }
+    }
+
+    @Override
+    public void returnDataList(ArrayList<String> list) {
+        data = list;
+        dataAdapter.notifyDataSetChanged();
     }
 }

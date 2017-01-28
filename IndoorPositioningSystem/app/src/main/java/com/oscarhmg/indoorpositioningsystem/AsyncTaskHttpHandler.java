@@ -157,8 +157,9 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         if ((time_Send + interval) < System.currentTimeMillis()) {
             if (CargarDatos()) {
                 response = cliente.request(_Server, toJSON());
+
                 HttpHandler requestPush = new HttpHandler();
-                requestPush.pushToHistoryPeople(buildJSONToPOST(response),_Server);
+                requestPush.pushToHistoryPeople(buildJSONToPOST(response),"https://testpositionserver-dot-navigator-cloud.appspot.com/push_message");
                 //Here take the response and take the location
                 Log.i("DATOS RESPONSE: ", response);
                 String room = getLocation(response);

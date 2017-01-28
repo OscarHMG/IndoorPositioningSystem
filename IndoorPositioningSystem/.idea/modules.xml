@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/IndoorPositioningSystem.iml" filepath="$PROJECT_DIR$/IndoorPositioningSystem.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/end-backend/end-backend.iml" filepath="$PROJECT_DIR$/end-backend/end-backend.iml" />
-      <module fileurl="file://$PROJECT_DIR$/end-backend/end-backend.iml" filepath="$PROJECT_DIR$/end-backend/end-backend.iml" />
     </modules>
   </component>
 </project>

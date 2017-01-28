@@ -100,6 +100,40 @@ public class HttpHandler {
         return result;
     }
 
+    public String getJSON(String url) {
+        HttpURLConnection c = null;
+        try {
+            URL u = new URL(url);
+            c = (HttpURLConnection) u.openConnection();
+            c.connect();
+            int status = c.getResponseCode();
+            switch (status) {
+                case 200:
+                case 201:
+                    BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line+"\n");
+                    }
+                    br.close();
+                    return sb.toString();
+            }
+
+        } catch (Exception ex) {
+            return ex.toString();
+        } finally {
+            if (c != null) {
+                try {
+                    c.disconnect();
+                } catch (Exception ex) {
+                    //disconnect error
+                }
+            }
+        }
+        return null;
+    }
+
     public String getRequestOnlinePeople(String URL){
         String result = null;
         try {
@@ -145,7 +179,7 @@ public class HttpHandler {
             wr.writeBytes(json.toString());
             wr.flush();
             wr.close();
-/*
+
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"));
 
             String line = null;
@@ -157,7 +191,7 @@ public class HttpHandler {
 
             bufferedReader.close();
             result = sb.toString();
-*/
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
