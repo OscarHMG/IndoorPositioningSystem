@@ -1,5 +1,6 @@
 package com.oscarhmg.indoorpositioningsystem;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -9,13 +10,19 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by user on 26/01/2017.
  */
 public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, ArrayList<String>> {
     ArrayList<String> persons = new ArrayList<>();
-    public ReturnData returnData;
+    private ReturnData returnData;
+
+    public AsyncTaskHttpRequestOnlinePeople(ReturnData returnData) {
+        this.returnData = returnData;
+    }
+
     @Override
     protected ArrayList<String> doInBackground(Void... voids) {
         HttpHandler request = new HttpHandler();
@@ -29,8 +36,6 @@ public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, Arra
     @Override
     protected void onPostExecute(ArrayList<String> strings) {
         super.onPostExecute(strings);
-        if(strings == null)
-            Log.e("Error","NULO");
         returnData.returnDataList(strings);
     }
 
@@ -52,11 +57,14 @@ public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, Arra
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return persons;
     }
 
     public ArrayList<String> getPersons() {
         return persons;
+    }
+
+    public interface ReturnData {
+        void returnDataList(List<String> list);
     }
 }

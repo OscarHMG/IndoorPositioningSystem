@@ -199,7 +199,7 @@ public class HttpHandler {
         }
     }
 
-    public String requestJSONPubSubVisitor(String name) throws IOException, JSONException {
+    public String requestJSONPubSubVisitor(String name){
         String result = null;
         try {
 
@@ -211,7 +211,7 @@ public class HttpHandler {
             httpURLConnection.connect();
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("visitante","Sergio");
+            jsonObject.put("visitante",name);
             Log.i("PUBSUB ", jsonObject.toString());
             DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
             wr.writeBytes(jsonObject.toString());

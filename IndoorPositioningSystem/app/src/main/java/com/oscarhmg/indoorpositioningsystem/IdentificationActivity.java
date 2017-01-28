@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.oscarhmg.indoorpositioningsystem.AsyncTaskHttpRequestOnlinePeople.ReturnData;
 import com.oscarhmg.indoorpositioningsystem.room.Room;
 import com.oscarhmg.indoorpositioningsystem.room.RoomsCTI;
 
@@ -30,19 +32,19 @@ import java.util.List;
 /**
  * Created by user on 17/11/2016.
  */
-public class IdentificationActivity extends Activity implements View.OnClickListener,ReturnData{
+public class IdentificationActivity extends Activity implements View.OnClickListener, ReturnData{
     private EditText visitor;
     private Spinner visited;
     private Button submit;
     private String visitedName;
     private int operation;
-    ArrayList <String> data;
+    List <String> data = new ArrayList<>();
     ArrayAdapter<String> dataAdapter;
-    AsyncTaskHttpRequestOnlinePeople task = new AsyncTaskHttpRequestOnlinePeople();
+    AsyncTaskHttpRequestOnlinePeople task = new AsyncTaskHttpRequestOnlinePeople(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        task.returnData = this;
+        //task.returnData = this;
         setContentView(R.layout.activity_identification);
         checkPermissions();
         visitor = (EditText)findViewById(R.id.visitorName);
@@ -54,29 +56,27 @@ public class IdentificationActivity extends Activity implements View.OnClickList
 
     }
 
-    public ArrayList getDataByUserAction(){
-        ArrayList <String> data = new ArrayList<>();
+    public void getDataByUserAction(){
+//        ArrayList <String> data = new ArrayList<>();
         Intent intent=getIntent();
         Bundle extras =intent.getExtras();
         operation = (int) extras.get("action");
         Log.i("Operation :", "" + operation);
         switch (operation){
             case 1:
-                data = getLivePersons();
+                getLivePersons();
                 break;
             case 2:
-                data = getRooms();
+                getRooms();
                 break;
             default:
                 break;
         }
-        return data;
     }
 
-    private ArrayList<String> getLivePersons() {
-        AsyncTaskHttpRequestOnlinePeople task = new AsyncTaskHttpRequestOnlinePeople();
+    private void getLivePersons() {
+
         task.execute();
-        return new ArrayList<>();
     }
 
 
@@ -85,19 +85,21 @@ public class IdentificationActivity extends Activity implements View.OnClickList
     public ArrayList getRooms(){
         ArrayList<String> rooms = new ArrayList<>();
         for(Room r: RoomsCTI.rooms){
-            String data = r.getNameRoom();
-            rooms.add(data);
+            String tmp = r.getNameRoom();
+            data.add(tmp);
         }
         return rooms;
     }
 
 
     public void addItemsOnSpinner(Spinner visited) {
-        List<String> list = getDataByUserAction();
+        getDataByUserAction();
         dataAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, list);
+                android.R.layout.simple_spinner_item, data);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         visited.setAdapter(dataAdapter);
+//        dataAdapter.notifyDataSetChanged();
+        dataAdapter.setNotifyOnChange(true);
     }
 
 
@@ -156,8 +158,10 @@ public class IdentificationActivity extends Activity implements View.OnClickList
     }
 
     @Override
-    public void returnDataList(ArrayList<String> list) {
-        data = list;
+    public void returnDataList(List<String> list) {
+//        data = list;
+        data.clear();
+        data.addAll(list);
         dataAdapter.notifyDataSetChanged();
     }
 }

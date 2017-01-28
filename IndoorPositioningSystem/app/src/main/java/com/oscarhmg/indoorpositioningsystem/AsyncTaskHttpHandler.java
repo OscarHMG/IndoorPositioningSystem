@@ -44,6 +44,7 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
     private static Room tmpVisitor,tmpVisited;
     private int operation;
     private String response;
+    private String optionSelected;
 
     public AsyncTaskHttpHandler(Activity activityMap) {
         this.activityMap = activityMap;
@@ -55,14 +56,12 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         arrayAdapter = (BeaconArrayAdapter) params[0];
         map = (GoogleMap) params[1];
         operation = (int) params[2];
-        String optionSelected = (String) params[3];
+        optionSelected = (String) params[3];
         visitorName = (String)params[4];
        if(!isCancelled() && arrayAdapter.getCount()!=0) {
            cliente = new HttpHandler();
            Room visitor = EnviarDatos();
-           //Room visitor = new Room("Hall", new LatLng((-2.14588796618926),-79.94867786765099),"pasilloproto1");
-           Room visited = doOperation(operation, optionSelected);
-
+           Room visited = doOperation(operation);
            result.add(visitor);
            result.add(visited);
            getRequestPath(visitor, visited);
@@ -110,25 +109,42 @@ public class AsyncTaskHttpHandler extends AsyncTask<Object,Void,ArrayList<Object
         //this.cancel(true);
 
 
-    public Room doOperation(int operation, String optionSelected){
+    public Room doOperation(int operation){
         Log.i("operation selected",optionSelected);
         switch (operation){
             case 1:
-                if(optionSelected.equals("Oscar")){
-                    return new Room("Rapid Prototyping Lab", new LatLng((-2.145940902667342),-79.94867417961359),"labproto");
-                }
-                if(optionSelected.equals("Sergio Moncayo")){
-                    return new Room("Hall", new LatLng((-2.14588796618926),-79.94867786765099),"pasilloproto1");
-                }
-                if(optionSelected.equals("fer")){
-                    return new Room("Lounge", new LatLng((-2.145801190566184),-79.94862053543329),"salaespera");
-                }
+                return getRequestPositionOfVisitor();
             case 2:
                 return getRoomByName(optionSelected);
         }
         return null;
     }
 
+
+    public Room getRequestPositionOfVisitor(){
+        String nickname = null;
+        HttpHandler request = new HttpHandler();
+        String response = request.requestJSONPubSubVisitor(optionSelected);
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            nickname = (String) jsonObject.get("location");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.i("Visito a x:",response);
+        return getRoomByNickName(nickname);
+
+    }
+
+    public Room getRoomByNickName(String nickname){
+        Room room = null;
+        for(Room r : RoomsCTI.rooms){
+           if(r.getNickName().equals(nickname)){
+               room = r;
+           }
+        }
+        return room;
+    }
 
     public Room getRoomByName(String name){
         Room room = null;
