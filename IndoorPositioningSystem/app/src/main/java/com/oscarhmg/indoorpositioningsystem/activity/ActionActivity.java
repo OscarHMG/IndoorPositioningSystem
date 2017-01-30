@@ -1,4 +1,4 @@
-package com.oscarhmg.indoorpositioningsystem;
+package com.oscarhmg.indoorpositioningsystem.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,6 +10,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.oscarhmg.indoorpositioningsystem.R;
+
 /**
  * Created by user on 10/01/2017.
  */
@@ -17,7 +19,8 @@ public class ActionActivity extends Activity {
     private RadioGroup radioGroup;
     private Button submit;
     private RadioButton radioButtonOtion;
-    private String options;
+    private static String optionFindPeople;
+    private static String optionFindRoom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +28,8 @@ public class ActionActivity extends Activity {
         setContentView(R.layout.activity_action_scanning);
         radioGroup = (RadioGroup)findViewById(R.id.radioGroup);
         radioGroup.clearCheck();
-        options = getResources().getString(R.string.radioButtonVisitedPerson);
+        optionFindPeople = getResources().getString(R.string.radioButtonVisitedPerson);
+        optionFindRoom = getResources().getString(R.string.radioButtonVisitedRoom);
         submit = (Button)findViewById(R.id.submitAction);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,14 +42,13 @@ public class ActionActivity extends Activity {
                     radioButtonOtion=(RadioButton)findViewById(selectedId);
                     String optionSelected = radioButtonOtion.getText().toString();
                     Log.i("RadioButton:",""+radioButtonOtion.getText().toString());
-                    if (optionSelected.equals(options)){
+                    if (optionSelected.equals(optionFindPeople)){
                         operation = 1;
                         Toast.makeText(ActionActivity.this,"Accion escogida:"+radioButtonOtion.getText(), Toast.LENGTH_LONG).show();
-                    }else{
+                    }else if(optionSelected.equals(optionFindRoom)){
                         Log.i("DATA PASS:","HABITACION");
                         operation = 2;
                     }
-
                     Intent intent = new Intent(ActionActivity.this, IdentificationActivity.class);
                     intent.putExtra("action", operation);
                     startActivity(intent);

@@ -2,11 +2,10 @@ package com.oscarhmg.indoorpositioningsystem.room;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
- * Created by user on 19/12/2016.
+ * Created by OscarHMG on 19/12/2016.
  */
 public final class RoomsCTI {
 

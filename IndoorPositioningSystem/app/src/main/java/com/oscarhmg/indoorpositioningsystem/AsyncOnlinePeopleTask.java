@@ -1,35 +1,30 @@
 package com.oscarhmg.indoorpositioningsystem;
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by user on 26/01/2017.
+ * Created by OscarHMG on 26/01/2017.
  */
-public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, ArrayList<String>> {
+public class AsyncOnlinePeopleTask extends AsyncTask<Void, Void, ArrayList<String>> {
     ArrayList<String> persons = new ArrayList<>();
     private ReturnData returnData;
 
-    public AsyncTaskHttpRequestOnlinePeople(ReturnData returnData) {
+    public AsyncOnlinePeopleTask(ReturnData returnData) {
         this.returnData = returnData;
     }
 
     @Override
     protected ArrayList<String> doInBackground(Void... voids) {
         HttpHandler request = new HttpHandler();
-        String response = request.getJSON("https://testpositionserver-dot-navigator-cloud.appspot.com/find_online_people");
-        Log.i("Online people", "" + response);
-
-        persons.addAll(getNamesofJSON(response));
+        String response = request.getJSON(Constants.URL_FIND_ALL_PEOPLE_ONLINE);
+        persons.addAll(getOnlinePeopleFromJSON(response));
         return persons;
     }
 
@@ -39,7 +34,7 @@ public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, Arra
         returnData.returnDataList(strings);
     }
 
-    public ArrayList<String> getNamesofJSON(String response){
+    public ArrayList<String> getOnlinePeopleFromJSON(String response){
         JSONArray arrayName;
         ArrayList<String> persons = new ArrayList<>();
         try {
@@ -49,7 +44,6 @@ public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, Arra
                     JSONObject person = (JSONObject) arrayName.get(i);
                     String name = (String) person.get("username");
                     persons.add(name);
-                    Log.i("Names:", "" + name);
                 }
             }else{
                 return persons;
@@ -60,9 +54,6 @@ public class AsyncTaskHttpRequestOnlinePeople extends AsyncTask<Void, Void, Arra
         return persons;
     }
 
-    public ArrayList<String> getPersons() {
-        return persons;
-    }
 
     public interface ReturnData {
         void returnDataList(List<String> list);

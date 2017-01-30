@@ -58,47 +58,6 @@ public class HttpHandler {
     }
 
 
-    public String requestJSONPubSub(String init, String fin) throws IOException, JSONException {
-        String result = null;
-        try {
-
-            URL url = new URL("https://testpositionserver-dot-navigator-cloud.appspot.com/get_shortest_path"); //Enter URL here
-            HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.
-            httpURLConnection.setRequestProperty("Content-Type", "application/json"); // here you are setting the `Content-Type` for the data you are sending which is `application/json`
-            httpURLConnection.connect();
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("inicio", init);
-            jsonObject.put("fin", fin);
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-            wr.writeBytes(jsonObject.toString());
-            wr.flush();
-            wr.close();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"));
-
-            String line = null;
-            StringBuilder sb = new StringBuilder();
-
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-
-            bufferedReader.close();
-            result = sb.toString();
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
 
     public String getJSON(String url) {
         HttpURLConnection c = null;
@@ -134,39 +93,11 @@ public class HttpHandler {
         return null;
     }
 
-    public String getRequestOnlinePeople(String URL){
-        String result = null;
-        try {
-            URL url = new URL(URL); //Enter URL here
-            HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.setRequestProperty("Content-Type", "application/json"); // here you are setting the `Content-Type` for the data you are sending which is `application/json`
-            httpURLConnection.connect();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"));
-
-            String line = null;
-            StringBuilder sb = new StringBuilder();
-
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-
-            bufferedReader.close();
-            result = sb.toString();
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-
-    }
 
 
-    public void pushToHistoryPeople(JSONObject json, String URL){
-        //https://testpositionserver-dot-navigator-cloud.appspot.com/pull_message
+    //Method post to a "X" URL
+    public String postJSON(JSONObject json, String URL){
+
         String result = null;
         try {
             URL url = new URL(URL); //Enter URL here
@@ -179,66 +110,20 @@ public class HttpHandler {
             wr.writeBytes(json.toString());
             wr.flush();
             wr.close();
-
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"));
-
             String line = null;
             StringBuilder sb = new StringBuilder();
-
             while ((line = bufferedReader.readLine()) != null) {
                 sb.append(line);
             }
-
             bufferedReader.close();
             result = sb.toString();
-
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String requestJSONPubSubVisitor(String name){
-        String result = null;
-        try {
-
-            URL url = new URL("https://testpositionserver-dot-navigator-cloud.appspot.com/find_visitor"); //Enter URL here
-            HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("POST"); // here you are telling that it is a POST request, which can be changed into "PUT", "GET", "DELETE" etc.
-            httpURLConnection.setRequestProperty("Content-Type", "application/json"); // here you are setting the `Content-Type` for the data you are sending which is `application/json`
-            httpURLConnection.connect();
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("visitante",name);
-            Log.i("PUBSUB ", jsonObject.toString());
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-            wr.writeBytes(jsonObject.toString());
-            wr.flush();
-            wr.close();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"));
-
-            String line = null;
-            StringBuilder sb = new StringBuilder();
-
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-
-            bufferedReader.close();
-            result = sb.toString();
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         return result;
     }
-    //make gral function to json request(url,JSON (armado ya))
+
 }
