@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -136,9 +137,11 @@ public class IdentificationActivity extends Activity implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-        visitedName = visited.getSelectedItem().toString();
+
         String tmp = (String)visitor.getText().toString();
-        if(tmp!=null && visitedName!=null){
+        /*if(tmp!=null && visitedName!=null){*/
+        if(!TextUtils.isEmpty(tmp) && !data.isEmpty()){
+            visitedName = visited.getSelectedItem().toString();
             Intent intent = new Intent(IdentificationActivity.this, MapActivity.class);
             intent.putExtra("option", visitedName);
             intent.putExtra("operation",operation);
@@ -147,10 +150,10 @@ public class IdentificationActivity extends Activity implements View.OnClickList
             startActivity(intent);
             this.finish();
         }else{
-            if(visitor.getText() ==null){
-                Toast.makeText(IdentificationActivity.this,"Ingrese su nombre para identificarse",Toast.LENGTH_LONG);
-            }else if(visitedName == null){
-                Toast.makeText(IdentificationActivity.this,"No existen personas en el edificio",Toast.LENGTH_LONG);
+            if(TextUtils.isEmpty(tmp)){
+                Toast.makeText(IdentificationActivity.this,"Ingrese su nombre para identificarse",Toast.LENGTH_LONG).show();
+            }else if(TextUtils.isEmpty(visitedName)){
+                Toast.makeText(IdentificationActivity.this,"No existen personas en el edificio",Toast.LENGTH_LONG).show();
             }
         }
     }

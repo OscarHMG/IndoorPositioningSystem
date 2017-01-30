@@ -38,6 +38,7 @@ import com.oscarhmg.indoorpositioningsystem.beacon.BeaconArrayAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
 
@@ -61,6 +62,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     private String optionSelected;
     private AsyncMapTask asyncThread;
     private String visitorName;
+
+    private MapActivity mapActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,8 +113,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                 else
                     arrayAdapter.add(new Beacon(result.getDevice().getAddress(), result.getRssi()));
 
-                Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
-                asyncThread = (AsyncMapTask) new AsyncMapTask(MapActivity.this).execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName);
+                //Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
+                asyncThread = (AsyncMapTask) new AsyncMapTask().execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this);
                 return;
             }
 

@@ -1,8 +1,10 @@
 package com.oscarhmg.indoorpositioningsystem;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -11,6 +13,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.oscarhmg.indoorpositioningsystem.activity.MapActivity;
 import com.oscarhmg.indoorpositioningsystem.beacon.BeaconArrayAdapter;
 import com.oscarhmg.indoorpositioningsystem.beacon.JBeacon;
 import com.oscarhmg.indoorpositioningsystem.room.Room;
@@ -42,6 +45,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
     private String optionSelectedInSpinner;
     private final static int OPTION_FIND_PERSON = 1;
     private final static int OPTION_FIND_ROOM = 2;
+    private MapActivity mapActivity;
 
 
     @Override
@@ -52,25 +56,43 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
         optionOfRadioButton = (int) params[2];
         optionSelectedInSpinner = (String) params[3];
         visitorName = (String)params[4];
+        mapActivity = (MapActivity) params[5];
        if(!isCancelled() && arrayAdapter.getCount()!=0) {/*If scanner info is !=null */
            cliente = new HttpHandler();
            Room visitor = GetMyActualPosition();
            Room visited = doOperationBaseInUserOption(optionOfRadioButton); //Get room or get position of X person in CTI Building
-           result.add(visitor);
-           result.add(visited);
-           getRequestPath(visitor, visited);
+           /*result.add(visitor);
+           result.add(visited);*/
+           if(visitor == null){
+               Toast.makeText(mapActivity,"Punto del visitante es nulo",Toast.LENGTH_LONG).show();
+               try {
+                   Thread.sleep(10000);
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           }else if(visited == null){
+               Toast.makeText(mapActivity,"Punto del visitado es nulo",Toast.LENGTH_LONG).show();
+               try {
+                   Thread.sleep(10000);
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           }else{
+               result.add(visitor);
+               result.add(visited);
+               getRequestPath(visitor, visited);
+           }
        }else{
            this.cancel(true);
            return null;
        }
         return result;
-
     }
 
     @Override
     protected void onPostExecute(ArrayList<Object> objects) {
         super.onPostExecute(objects);
-        if (objects != null) {
+        if (objects != null && !objects.isEmpty()) {
             Room myPoint = (Room) objects.get(0);
             Room visitedPoint = (Room)objects.get(1);
             if (visitorMarker != null)
@@ -85,7 +107,6 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             }else{
                 visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.room));
             }
-
         }
         drawPath();
         this.cancel(true);
@@ -112,6 +133,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
         String response = request.postJSON(jsonToSend, Constants.URL_FIND_VISITED_PERSON);
         JSONObject jsonResponse = new JSONObject(response);
         nickname = (String) jsonResponse.get("location");
+        Log.i("Habitaciones Visitado: ", nickname);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -147,10 +169,10 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             response = cliente.request(Constants.PROXY_SERVER, toJSON());
             requestPush.postJSON(createJSONTOLog(response), Constants.URL_CONNECTION_LOG);
             //Here take the response and take the location
-            Log.i("DATOS RESPONSE: ", response);
+            Log.i("Actual Position JSON: ", response);
             String room = getLocationFromJSONResponse(response);
             if (room != null) { //Succesfull
-                Log.i("ROOM UBICATION: ", room);
+                Log.i("Habitaciones Visitante:", room);
                 myPosition = getRoomByNickName(room); // Get the room where I am
             }
         }
@@ -167,10 +189,14 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
 
     public JSONObject createJSONTOLog(String response){
         JSONObject jsonObject = null;
+        if(response==null){
+            Toast.makeText(mapActivity,"Respuesta server proxy es nula",Toast.LENGTH_LONG).show();
+        }
         try {
             jsonObject = new JSONObject(response);
             jsonObject.put("username", visitorName);
         } catch (JSONException e) {
+            Log.e("Error","Post en la bitacora");
             e.printStackTrace();
         }
         return jsonObject;
@@ -228,7 +254,6 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             Log.i("Null Path"," Error in path");
         }else{
             ubications = getShortestPathFromJSON(jsonResponseDijsktra);
-
         }
     }
 
