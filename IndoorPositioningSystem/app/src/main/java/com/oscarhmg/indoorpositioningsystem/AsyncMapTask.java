@@ -46,7 +46,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
     private final static int OPTION_FIND_PERSON = 1;
     private final static int OPTION_FIND_ROOM = 2;
     private MapActivity mapActivity;
-
+    private double angleRotation;
 
     @Override
     protected ArrayList<Object> doInBackground(Object... params) {
@@ -57,6 +57,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
         optionSelectedInSpinner = (String) params[3];
         visitorName = (String)params[4];
         mapActivity = (MapActivity) params[5];
+        angleRotation = (double)params[6];
        if(!isCancelled() && arrayAdapter.getCount()!=0) {/*If scanner info is !=null */
            cliente = new HttpHandler();
            Room visitor = GetMyActualPosition();
@@ -98,7 +99,8 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             if (visitorMarker != null)
                 visitorMarker.remove();
             visitorMarker = map.addMarker(new MarkerOptions().position(myPoint.getCoordinates()));
-            visitorMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visitor));
+            visitorMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.arrow_green));
+            visitorMarker.setRotation((float) angleRotation);
             if(visitedMarker!=null)
                 visitedMarker.remove();
             visitedMarker = map.addMarker(new MarkerOptions().position(visitedPoint.getCoordinates()));
@@ -133,7 +135,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
         String response = request.postJSON(jsonToSend, Constants.URL_FIND_VISITED_PERSON);
         JSONObject jsonResponse = new JSONObject(response);
         nickname = (String) jsonResponse.get("location");
-        Log.i("Habitaciones Visitado: ", nickname);
+        //Log.i("Habitaciones Visitado: ", nickname);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -169,10 +171,10 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             response = cliente.request(Constants.PROXY_SERVER, toJSON());
             requestPush.postJSON(createJSONTOLog(response), Constants.URL_CONNECTION_LOG);
             //Here take the response and take the location
-            Log.i("Actual Position JSON: ", response);
+            //Log.i("Actual Position JSON: ", response);
             String room = getLocationFromJSONResponse(response);
             if (room != null) { //Succesfull
-                Log.i("Habitaciones Visitante:", room);
+                //Log.i("Habitaciones Visitante:", room);
                 myPosition = getRoomByNickName(room); // Get the room where I am
             }
         }

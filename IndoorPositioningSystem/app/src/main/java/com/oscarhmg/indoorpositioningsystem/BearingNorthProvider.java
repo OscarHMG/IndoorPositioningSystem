@@ -1,5 +1,5 @@
-package magnetometer.com.bearingnorth;
 
+package com.oscarhmg.indoorpositioningsystem;
 import android.content.Context;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
@@ -12,10 +12,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+
 /**
- * Created by user on 02/02/2017.
+ * Created by OscarHMG on 02/02/2017.
  */
-public class BearingNorthProvider implements SensorEventListener,LocationListener {
+public class BearingNorthProvider implements SensorEventListener,LocationListener{
     public static final String TAG = "BearingNorthProvider ";
 
     /**

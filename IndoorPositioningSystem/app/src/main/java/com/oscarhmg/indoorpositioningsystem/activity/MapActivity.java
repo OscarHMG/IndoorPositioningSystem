@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.oscarhmg.indoorpositioningsystem.AsyncMapTask;
+import com.oscarhmg.indoorpositioningsystem.BearingNorthProvider;
 import com.oscarhmg.indoorpositioningsystem.R;
 import com.oscarhmg.indoorpositioningsystem.beacon.Beacon;
 import com.oscarhmg.indoorpositioningsystem.beacon.BeaconArrayAdapter;
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback, BearingNorthProvider.ChangeEventListener{
 
     private GoogleMap mapCTI; // Might be null if Google Play services APK is not available.
     //Scanners
@@ -63,11 +64,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
     private AsyncMapTask asyncThread;
     private String visitorName;
 
-    private MapActivity mapActivity;
+    private BearingNorthProvider mBearingProvider;
+    private double angleRotation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        mBearingProvider = new BearingNorthProvider(this);
+        mBearingProvider.setChangeEventListener(this);
         Intent intent=getIntent();
         Bundle extras =intent.getExtras();
         operation = (int) extras.get("operation");
@@ -114,7 +119,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
                     arrayAdapter.add(new Beacon(result.getDevice().getAddress(), result.getRssi()));
 
                 //Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
-                asyncThread = (AsyncMapTask) new AsyncMapTask().execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this);
+                Log.i("ROTATION:",""+angleRotation);
+                asyncThread = (AsyncMapTask) new AsyncMapTask().execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this,angleRotation);
                 return;
             }
 
@@ -152,6 +158,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         setUpMapIfNeeded();
         if (scanner != null) {
             scanner.startScan(scanFilters, SCAN_SETTINGS, scanCallback);
+            mBearingProvider.start();
         }else{
             Log.i("Process:","ERROR, NOT SCANNING");
         }
@@ -287,8 +294,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback{
         super.onBackPressed();
         scanner.stopScan(scanCallback);
         asyncThread.cancel(true);
+        mBearingProvider.stop();
         this.finish();
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBearingProvider.stop();
+    }
 
+    @Override
+    public void onBearingChanged(double bearing) {
+        angleRotation = bearing;
     }
 }

@@ -1,5 +1,4 @@
-package magnetometer.com.bearingnorth;
-
+package com.oscarhmg.indoorpositioningsystem;
 /**
  * Created by user on 02/02/2017.
  */
