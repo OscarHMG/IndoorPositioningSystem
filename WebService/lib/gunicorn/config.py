@@ -552,7 +552,7 @@ class Workers(Setting):
     meta = "INT"
     validator = validate_pos_int
     type = int
-    default = int(os.environ.get("WEB_CONCURRENCY", 1))
+    default = int(os.environ.get("WEB_CONCURRENCY", 4))
     desc = """\
         The number of worker processes for handling requests.
 
@@ -571,7 +571,7 @@ class WorkerClass(Setting):
     cli = ["-k", "--worker-class"]
     meta = "STRING"
     validator = validate_class
-    default = "sync"
+    default = "async"
     desc = """\
         The type of workers to use.
 
@@ -602,7 +602,7 @@ class WorkerThreads(Setting):
     meta = "INT"
     validator = validate_pos_int
     type = int
-    default = 1
+    default = 4
     desc = """\
         The number of worker threads for handling requests.
 

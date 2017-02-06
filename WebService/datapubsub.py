@@ -116,6 +116,18 @@ def pull_message_data():
 
     return messages_pulling
 
+
+# def getOrientation(Nodo,angle):
+#     load_data = json.loads(angle)
+
+#     if(is_empty(load_data)):
+#         return {"Orientation":"Data is empty"}
+#     else:
+        
+
+
+
+
                     
 def contains_item(mensaje,data):
     for index, item in enumerate(data):

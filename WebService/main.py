@@ -11,6 +11,7 @@ import graphsMethods
 app = Flask(__name__)
 
 MESSAGE=[]
+Current_Node=""
 #MESSAGE_PUBLISHED=[]
 
 app.config['DEBUG'] = False #True for local test
@@ -41,6 +42,7 @@ def get_shortest_path():
     return   resultado  #json.dumps(nx.dijkstra_path(Grafo,30,18))
 
 #Get the message of 4 message available on the pubsub
+#This method is very inastable to check in real time.
 @app.route('/pull_message')
 def pull_message():
     mensaje = []
@@ -71,13 +73,13 @@ def get_current_graph():
     return resultado
 
 
-#Return if is successfull return the ack otherwise return a empty response
+#Return if is successfull storage the list of people online, otherwise storing a empty list
 @app.route('/push_message',methods=['POST'])
 def push_message():
     global MESSAGE
     lista_nueva = []
     global bandera 
-    envelope = request.data.decode('utf-8') #\n\n
+    envelope = request.data #\n\n
     print envelope
     data_publish = datapubsub.pubsub_push(envelope)
     #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
@@ -128,6 +130,26 @@ def find_visitor():
     resultado = datapubsub.get_data_filter(envelope,listado)
     #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
     return  resultado #json.dumps(resultado)
+
+#Return a json of people online, if no one online send a empty list
+@app.route('/find_online_people',methods=['GET'])
+def find_online_people():
+    global MESSAGE
+    listado = MESSAGE[:]
+    #envelope = json.loads(request.data)#\n\n
+    #envelope = request.data.decode('utf-8')
+    #print envelope
+    #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
+    return  json.dumps(listado) #json.dumps(resultado)
+
+#Return the orientation
+@app.route('/get_orientation',methods=['POST'])
+def get_orientation():
+    global Current_Node
+    # envelope = request.data
+    # set_orientation = datapubsub.getOrientation(Current_Node,envelope)
+
+    return "Not implement yet"
 
 
 @app.errorhandler(404)
