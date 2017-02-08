@@ -7,6 +7,7 @@ import subscriber
 import publisher
 import datapubsub
 import graphsMethods
+import sys
 
 app = Flask(__name__)
 
@@ -14,7 +15,7 @@ MESSAGE=[]
 Current_Node=""
 #MESSAGE_PUBLISHED=[]
 
-app.config['DEBUG'] = False #True for local test
+app.config['DEBUG'] = True #True for local test
 
 
 #Global Variables:
@@ -25,7 +26,7 @@ TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev
 # { "username": "Xavier Pionce","location": "labihm","timestamp": "2017-01-12T17:14:05Z"}
 
 #Use for local test
-#server_name="localhost"
+server_name="localhost"
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
@@ -88,9 +89,13 @@ def push_message():
     else:
         ps = pubsub.Client()
         topic = ps.topic(TEST_TOPIC)
-        topic.publish(json.dumps(data_publish).encode('utf-8'))
 
-        #print "Data recieved: ", subscriber.receive_message_fast(TEST_TOPIC,TEST_SUBSCRIPTION)
+        try:
+             topic.publish(json.dumps(data_publish).encode('utf-8'))
+        except: # catch *all* exceptions
+             e = sys.exc_info()[0]
+             print ( "<p>Error: %s</p>" % e )
+             return "Error exceptions: undefine utf-8, there is some special character"
 
         if datapubsub.is_empty(MESSAGE):
             #default_data.update({'item3': 3})
@@ -104,7 +109,7 @@ def push_message():
                 data_publish = datapubsub.pubsub_push(envelope)
                 for index, item in enumerate(lista_nueva):
                     #print "Ver mensaje: ", item['username']
-                    print "tratado: ", data_publish['username']
+                    #print "tratado: ", data_publish['username']
                     if item['username'] == data_publish['username']:
                         lista_nueva.pop(index)
                         lista_nueva.insert(index,data_publish)
@@ -137,19 +142,17 @@ def find_online_people():
     global MESSAGE
     listado = MESSAGE[:]
     #envelope = json.loads(request.data)#\n\n
-    #envelope = request.data.decode('utf-8')
-    #print envelope
-    #resultado = publisher.publish_message(TEST_TOPIC, str(envelope).replace('\n\n',''))
+
     return  json.dumps(listado) #json.dumps(resultado)
 
 #Return the orientation
 @app.route('/get_orientation',methods=['POST'])
 def get_orientation():
     global Current_Node
-    # envelope = request.data
-    # set_orientation = datapubsub.getOrientation(Current_Node,envelope)
+    envelope = request.data
+    set_orientation = datapubsub.getOrientation(envelope)
 
-    return "Not implement yet"
+    return json.dumps(set_orientation)
 
 
 @app.errorhandler(404)
@@ -168,8 +171,8 @@ def hello():
 
 # Using for local development
 # Comment this lines when deploy this app in the Google Cloud
-# if __name__ == '__main__':
-# 	app.run( 
-# 		host=server_name,
-# 		port=int("8070")
-# 	)
+if __name__ == '__main__':
+	app.run( 
+		host=server_name,
+		port=int("8070")
+	)
