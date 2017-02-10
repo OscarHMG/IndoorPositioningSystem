@@ -3,13 +3,21 @@ api_version: 1
 threadsafe: yes
 service: testpositionserver
 
+instance_class: F2
+automatic_scaling:
+  min_idle_instances: 5
+  max_idle_instances: automatic  # default value
+  min_pending_latency: 300ms  # default value
+  max_pending_latency: automatic
+  max_concurrent_requests: 60
+
 
 handlers:
 - url: .*
   script: main.app
 - url: /favicon.ico
   static_files: static/images/Favicon.ico
-  upload: static/images/Favicon\.ico
+  upload: static/images/Favicon.ico
 
 libraries:
 - name: jinja2

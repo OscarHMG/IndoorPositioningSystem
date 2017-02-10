@@ -563,7 +563,7 @@ def run_simple(hostname, port, application, use_reloader=False,
                use_debugger=False, use_evalex=True,
                extra_files=None, reloader_interval=2,
                reloader_type='auto', threaded=True,
-               processes=1, request_handler=None, static_files=None,
+               processes=6, request_handler=None, static_files=None,
                passthrough_errors=False, ssl_context=None):
     """Start a WSGI application. Optional features include a reloader,
     multithreading and fork support.
