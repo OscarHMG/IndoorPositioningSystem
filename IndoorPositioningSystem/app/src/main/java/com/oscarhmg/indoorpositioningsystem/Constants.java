@@ -10,5 +10,5 @@ public final class Constants {
     public final static String URL_GET_SHORTEST_PATH = "https://testpositionserver-dot-navigator-cloud.appspot.com/get_shortest_path";
     public final static String GROUP = "test1";
     public final static String URL_FIND_ALL_PEOPLE_ONLINE= "https://testpositionserver-dot-navigator-cloud.appspot.com/find_online_people";
-
+    public final static String URL_GET_ORIENTATION="https://testpositionserver-dot-navigator-cloud.appspot.com/get_orientation";
 }

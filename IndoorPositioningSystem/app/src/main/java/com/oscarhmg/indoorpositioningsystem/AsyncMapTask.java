@@ -1,5 +1,6 @@
 package com.oscarhmg.indoorpositioningsystem;
 
+import android.bluetooth.le.ScanCallback;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -23,12 +24,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+
+
+
 import java.util.ArrayList;
 
 /**
  * Created by OscarHMG on 10/01/2017.
  */
-public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
+public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> implements BearingNorthProvider.ChangeEventListener {
     private long time_Send;
     final private long interval = 2050;
     final private long wait = 950;
@@ -47,9 +52,33 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
     private final static int OPTION_FIND_ROOM = 2;
     private MapActivity mapActivity;
     private double angleRotation;
+    private static String orientation;
+    private Context context;
+    private RotateMarker mListener;
+    private BearingNorthProvider mBearingProvider;
+
+
+    @Override
+    public void onBearingChanged(double bearing) {
+        visitorMarker.setRotation((float) bearing);
+        angleRotation = bearing;
+        Log.i("Rotation",""+angleRotation);
+    }
+
+    public interface RotateMarker{
+        public void getRotationMarker(Marker marker);
+    }
+    public AsyncMapTask(Context context) {
+        this.context = context;
+        mListener = (RotateMarker) context;
+//        visitorMarker = new Marker();
+    }
 
     @Override
     protected ArrayList<Object> doInBackground(Object... params) {
+        mBearingProvider = new BearingNorthProvider(context);
+        mBearingProvider.setChangeEventListener(this);
+
         ArrayList<Object> result = new ArrayList<>();
         arrayAdapter = (BeaconArrayAdapter) params[0];
         map = (GoogleMap) params[1];
@@ -57,7 +86,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
         optionSelectedInSpinner = (String) params[3];
         visitorName = (String)params[4];
         mapActivity = (MapActivity) params[5];
-        angleRotation = (double)params[6];
+        //angleRotation = (double)params[6];
        if(!isCancelled() && arrayAdapter.getCount()!=0) {/*If scanner info is !=null */
            cliente = new HttpHandler();
            Room visitor = GetMyActualPosition();
@@ -100,17 +129,23 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
                 visitorMarker.remove();
             visitorMarker = map.addMarker(new MarkerOptions().position(myPoint.getCoordinates()));
             visitorMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.arrow_green));
-            visitorMarker.setRotation((float) angleRotation);
-            if(visitedMarker!=null)
+//            visitorMarker.setRotation((float) angleRotation);
+            //mListener.getRotationMarker(visitorMarker);
+            if(visitedMarker!=null) {
                 visitedMarker.remove();
+                mBearingProvider.stop();
+            }
             visitedMarker = map.addMarker(new MarkerOptions().position(visitedPoint.getCoordinates()));
+            mBearingProvider.start();
             if(optionOfRadioButton == OPTION_FIND_PERSON){
-                visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.visited));
+                visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.goal));
             }else{
-                visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.room));
+                visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.goal));
             }
         }
         drawPath();
+        //json
+        Toast.makeText(context,"Orientacion:"+orientation, Toast.LENGTH_SHORT).show();
         this.cancel(true);
     }
 
@@ -256,6 +291,29 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             Log.i("Null Path"," Error in path");
         }else{
             ubications = getShortestPathFromJSON(jsonResponseDijsktra);
+            if(ubications.size()>1){
+                LatLng init = ubications.get(0);
+                LatLng second = ubications.get(1);
+                JSONObject jsonObject =createJSONTracking(init, second);
+                Log.i("JSON POINTS",jsonObject.toString());
+                HttpHandler httpRequest = new HttpHandler();
+                String orientationResponse = httpRequest.postJSON(jsonObject,Constants.URL_GET_ORIENTATION);
+                try {
+                    JSONObject responseOrientation = new JSONObject(orientationResponse);
+                    responseOrientation.get("instruction");
+                    if(orientation == null){
+                        orientation = orientationResponse;
+                    }else{
+                        if(!orientation.equals(orientationResponse)){
+                            //Show orientation to the user
+                            orientation = orientationResponse;
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Log.i("Orientation",orientation);
+            }
         }
     }
 
@@ -276,7 +334,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
         return tmp;
     }
 
-
+    /* Draw path between 2 points*/
     public void drawPath() {
         if (polylines.size()>0){
             deletePath();
@@ -296,6 +354,23 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> {
             line.remove();
         }
         polylines.clear();
+    }
+
+
+    public JSONObject createJSONTracking(LatLng init, LatLng goal){
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("pointA",init.latitude);
+            obj.accumulate("pointA", init.longitude);
+            obj.put("pointB", goal.latitude);
+            obj.accumulate("pointB", goal.longitude);
+            obj.put("angle",angleRotation);
+            Log.i("Rotation JSON",""+angleRotation);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return obj;
     }
 
 }

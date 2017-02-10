@@ -31,17 +31,21 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.oscarhmg.indoorpositioningsystem.AsyncMapTask;
 import com.oscarhmg.indoorpositioningsystem.BearingNorthProvider;
 import com.oscarhmg.indoorpositioningsystem.R;
 import com.oscarhmg.indoorpositioningsystem.beacon.Beacon;
 import com.oscarhmg.indoorpositioningsystem.beacon.BeaconArrayAdapter;
+import com.oscarhmg.indoorpositioningsystem.room.Room;
+import com.oscarhmg.indoorpositioningsystem.room.RoomsCTI;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback, BearingNorthProvider.ChangeEventListener{
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback, AsyncMapTask.RotateMarker{
 
     private GoogleMap mapCTI; // Might be null if Google Play services APK is not available.
     //Scanners
@@ -71,8 +75,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        mBearingProvider = new BearingNorthProvider(this);
-        mBearingProvider.setChangeEventListener(this);
+        //mBearingProvider = new BearingNorthProvider(this);
+        //mBearingProvider.setChangeEventListener(this);
         Intent intent=getIntent();
         Bundle extras =intent.getExtras();
         operation = (int) extras.get("operation");
@@ -80,8 +84,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         visitorName = (String)extras.get("visitorName");
         prepareMap();
         prepareScanners();
+        //setMarkersOnRooms();
+        /*mapCTI.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng point) {
+                MarkerOptions marker = new MarkerOptions().position(
+                        new LatLng(point.latitude, point.longitude)).title("New Marker");
 
+                mapCTI.addMarker(marker);
 
+                Log.i("Position:","("+point.latitude +","+point.longitude+")");
+            }
+        });*/
 
     }
 
@@ -119,8 +133,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     arrayAdapter.add(new Beacon(result.getDevice().getAddress(), result.getRssi()));
 
                 //Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
-                Log.i("ROTATION:",""+angleRotation);
-                asyncThread = (AsyncMapTask) new AsyncMapTask().execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this,angleRotation);
+                //Log.i("ROTATION:",""+angleRotation);
+                asyncThread = (AsyncMapTask) new AsyncMapTask(MapActivity.this).execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this);
                 return;
             }
 
@@ -158,7 +172,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         setUpMapIfNeeded();
         if (scanner != null) {
             scanner.startScan(scanFilters, SCAN_SETTINGS, scanCallback);
-            mBearingProvider.start();
+            //mBearingProvider.start();
         }else{
             Log.i("Process:","ERROR, NOT SCANNING");
         }
@@ -252,7 +266,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
 
-   /* public void setMarkersOnRooms(){
+    public void setMarkersOnRooms() {
         Log.i("Size: ", "" + RoomsCTI.rooms.size());
         Log.i("Positions: ", "" + RoomsCTI.rooms.get(1).getCoordinates());
         Room tmp = null;
@@ -261,7 +275,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             mapCTI.addMarker(new MarkerOptions().position(tmp.getCoordinates()).title(tmp.getNameRoom()));
         }
     }
-*/
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -294,18 +308,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onBackPressed();
         scanner.stopScan(scanCallback);
         asyncThread.cancel(true);
-        mBearingProvider.stop();
+       // mBearingProvider.stop();
         this.finish();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mBearingProvider.stop();
+      //  mBearingProvider.stop();
     }
 
+
+
     @Override
-    public void onBearingChanged(double bearing) {
-        angleRotation = bearing;
+    public void getRotationMarker(Marker marker) {
+        marker.setRotation((float) angleRotation);
     }
 }
+
+

@@ -43,6 +43,9 @@ dependencies {
     compile('com.google.android.gms:play-services:8.1.0') {
         exclude group: 'com.google.common.annotations'
         exclude module: 'play-services-appstate';
+        // https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
+
+
     }
     /*compile(project(path: ':end-backend', configuration: 'android-endpoints')) {
         exclude(module: 'guava-jdk5')
