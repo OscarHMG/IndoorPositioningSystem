@@ -15,7 +15,7 @@ MESSAGE=[]
 Current_Node=""
 #MESSAGE_PUBLISHED=[]
 
-app.config['DEBUG'] = True #True for local test
+app.config['DEBUG'] = False #True for local test
 
 
 #Global Variables:
@@ -26,7 +26,7 @@ TEST_SUBSCRIPTION = 'pull_messages_serverhttp' # map-worker-sub   map-worker-dev
 # { "username": "Xavier Pionce","location": "labihm","timestamp": "2017-01-12T17:14:05Z"}
 
 #Use for local test
-server_name="localhost"
+#server_name="localhost"
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
@@ -39,7 +39,7 @@ server_name="localhost"
 def get_shortest_path():
     envelope = request.data.decode('utf-8')
     print envelope
-    resultado = graphsMethods.shortest_path(envelope,'graphCTI.json') 
+    resultado = graphsMethods.shortest_path(envelope,'graphCTI2.json') 
     return   resultado  #json.dumps(nx.dijkstra_path(Grafo,30,18))
 
 #Get the message of 4 message available on the pubsub
@@ -69,7 +69,7 @@ def pull_message_fast():
 #Get the properties of the graph
 @app.route('/get_current_graph')
 def get_current_graph():
-    resultado =   graphsMethods.read_json_file('graphCTI.json') #graphIncompleteCTI  graphCTI.json 
+    resultado =   graphsMethods.read_json_file('graphCTI2.json') #graphIncompleteCTI  graphCTI.json 
     #dictionary=  json.dumps(resultado)
     return resultado
 
@@ -171,8 +171,8 @@ def hello():
 
 # Using for local development
 # Comment this lines when deploy this app in the Google Cloud
-if __name__ == '__main__':
-	app.run( 
-		host=server_name,
-		port=int("8070")
-	)
+# if __name__ == '__main__':
+# 	app.run( 
+# 		host=server_name,
+# 		port=int("8072")
+# 	)
