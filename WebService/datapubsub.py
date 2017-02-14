@@ -66,6 +66,7 @@ def pubsub_push(mensaje):
 
 def getOrientation(angle):
     load_data = json.loads(angle)
+    #{"pointA":[-2.145940902667342,-79.94867417961359], "pointB":[-2.1459157745925403,-79.94872044771908],"angle":335.5}
     instruction={}
     state_current = ""
     state_reference = ""
@@ -99,17 +100,17 @@ def set_Quadrants(angle):
     angle_see = angle
     quadrant = 1.0
 
-    if (angle_see > 360):
-        angle_see = angle_see %360
+    if (angle_see > 360.0 or angle_see < 0.0):
+        angle_see = (angle_see +360.0) % 360.0
 
     if( angle_see >=0.0 and angle_see <=90.0):
-        quadrant = 2.0
-    elif (angle_see <= 180.0 and angle_see >90.0):
-        quadrant = 3.0
-    elif (angle_see <= 270.0 and angle_see > 180.0):
-        quadrant = 4.0
-    elif (angle_see >= 360.0 and angle_see <270.0) or (angle_see <0.0):
         quadrant = 1.0
+    elif (angle_see <= 180.0 and angle_see >90.0):
+        quadrant = 2.0
+    elif (angle_see <= 270.0 and angle_see > 180.0):
+        quadrant = 3.0
+    elif (angle_see <= 360.0 and angle_see > 270.0):
+        quadrant = 4.0
 
     return quadrant
 
@@ -118,28 +119,36 @@ def set_instruction(*args):
     quadrant2 = args[1]
     angle1 = args[2]
     angle2 = args[3]
-    umbral = 30.0
+    umbral = 15.0
     instruction = ""
+    print"cuadrante1:",quadrant1
+    print "cuadrante2:",quadrant2
 
     if (quadrant1 != quadrant2):
-        if(quadrant2 +1.0 == quadrant1 or (quadrant2==4.0 and quadrant1==1)):
+        print "Diferentes"
+        if(((quadrant1+1 == quadrant2) and (angle2%90)+(angle1%90)<=90.0) or ((quadrant1==4.0 and quadrant2==1)and (angle2%90)+(angle1%90)<=90.0)):
             instruction = "Gire a la derecha"
             return instruction
-        elif (quadrant2 == 1.0  and quadrant1 == 3.0) or (quadrant2 == 2.0 and quadrant1 == 4.0) or (quadrant2 == 4.0 and quadrant1 == 2.0) or (quadrant2 == 3.0 and quadrant1 == 1.0):
+        elif ((quadrant2 == 1.0  and quadrant1 == 3.0)) or ((quadrant2 == 2.0 and quadrant1 == 4.0) ) or ((quadrant2 == 4.0 and quadrant1 == 2.0) ) or ((quadrant2 == 3.0 and quadrant1 == 1.0) ):
             instruction = "De media vuelta"
             return instruction
-        elif (quadrant2 == 1.0 and quadrant1 == 4.0) or (quadrant2 - 1.0 == quadrant1 ):
+        elif (((quadrant1 == 1.0 and quadrant2 == 4.0)and (angle2%90)+(angle1%90)<=90.0) or ((quadrant1 - 1.0 == quadrant2)and (angle2%90)+(angle1%90)<=90.0) ):
             instruction ="Gire a la izquierda"
             return instruction
+        elif (((quadrant1 +1.0 == quadrant2) and (angle2%90)+(angle1%90)>90.0) or ((quadrant1==4.0 and quadrant2==1)and (angle2%90)+(angle1%90)>90.0) or ((quadrant1 == 1.0 and quadrant2 == 4.0)and (angle2%90)+(angle1%90)>90.0) or ((quadrant1 - 1.0 == quadrant2)and (angle2%90)+(angle1%90)>90.0) ):
+            instruction="De media vuelta"
+            return instruction
     else:
-        if(set_Quadrants(angle2+umbral) == quadrant1):
-            if((angle2+umbral)< angle1):
-                instruction = "Gire a la derecha"
+        print "Iguales"
+        if(set_Quadrants((angle2)+umbral) == quadrant1):
+            if(((angle2)+umbral)< (angle1)):
+                instruction = "Gire a la izquierda"
                 return instruction
 
-        if(set_Quadrants(angle2-umbral) == quadrant1):
-            if((angle2-umbral)> angle1):
-                instruction = "Gire a la izquierda"
+        if(set_Quadrants((angle2)-umbral) == quadrant1):
+            if(((angle2)-umbral)> (angle1)):
+                print "umbral menor:",(angle2)-umbral
+                instruction = "Gire a la derecha"
                 return instruction
 
         instruction = "Siga de frente"
