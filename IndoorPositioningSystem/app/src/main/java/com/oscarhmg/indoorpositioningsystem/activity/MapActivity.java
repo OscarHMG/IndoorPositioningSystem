@@ -70,6 +70,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     private BearingNorthProvider mBearingProvider;
     private double angleRotation;
+    private static Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +135,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
                 //Log.v(TAG, "MAAC: " + result.getDevice().getAddress() + ", RSSI: " + result.getRssi());
                 //Log.i("ROTATION:",""+angleRotation);
-                asyncThread = (AsyncMapTask) new AsyncMapTask(MapActivity.this).execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this);
+                asyncThread = (AsyncMapTask) new AsyncMapTask(MapActivity.this).execute(arrayAdapter, mapCTI,operation,optionSelected,visitorName,MapActivity.this,toast);
                 return;
             }
 
@@ -215,7 +216,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
      */
     private void setUpMap() {
         LatLng cti = new LatLng(-2.145818, -79.948939);
-        mapCTI.moveCamera(CameraUpdateFactory.newLatLngZoom(cti, 20));
+        mapCTI.moveCamera(CameraUpdateFactory.newLatLngZoom(cti, 19));
 
         setOverlayCTIMap();
         /*mapCTI.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -319,6 +320,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        scanner.stopScan(scanCallback);
+        asyncThread.cancel(true);
+        // mBearingProvider.stop();
+        this.finish();
+    }
 
     @Override
     public void getRotationMarker(Marker marker) {

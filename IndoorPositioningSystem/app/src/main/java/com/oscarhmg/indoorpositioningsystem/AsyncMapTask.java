@@ -40,8 +40,8 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
     private HttpHandler cliente;
     private BeaconArrayAdapter arrayAdapter;
     private GoogleMap map;
-    private static Marker visitorMarker;
-    private static Marker visitedMarker;
+    private static Marker visitorMarker = null;
+    private static Marker visitedMarker = null;
     private static ArrayList <LatLng>ubications = new ArrayList();
     private static ArrayList <Polyline> polylines = new ArrayList<>();
     private String visitorName;
@@ -56,13 +56,18 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
     private Context context;
     private RotateMarker mListener;
     private BearingNorthProvider mBearingProvider;
-
+    private LatLng init,second;
+    private static Toast toast;
 
     @Override
     public void onBearingChanged(double bearing) {
         visitorMarker.setRotation((float) bearing);
         angleRotation = bearing;
         Log.i("Rotation",""+angleRotation);
+        if(init!= null && second!=null){
+            AsyncOrientationTask taskOrientation = (AsyncOrientationTask) new AsyncOrientationTask(context).execute(init,second,angleRotation,toast);
+        }
+
     }
 
     public interface RotateMarker{
@@ -78,7 +83,6 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
     protected ArrayList<Object> doInBackground(Object... params) {
         mBearingProvider = new BearingNorthProvider(context);
         mBearingProvider.setChangeEventListener(this);
-
         ArrayList<Object> result = new ArrayList<>();
         arrayAdapter = (BeaconArrayAdapter) params[0];
         map = (GoogleMap) params[1];
@@ -86,7 +90,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
         optionSelectedInSpinner = (String) params[3];
         visitorName = (String)params[4];
         mapActivity = (MapActivity) params[5];
-        //angleRotation = (double)params[6];
+        toast = (Toast)params[6];
        if(!isCancelled() && arrayAdapter.getCount()!=0) {/*If scanner info is !=null */
            cliente = new HttpHandler();
            Room visitor = GetMyActualPosition();
@@ -125,18 +129,20 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
         if (objects != null && !objects.isEmpty()) {
             Room myPoint = (Room) objects.get(0);
             Room visitedPoint = (Room)objects.get(1);
-            if (visitorMarker != null)
+            if (visitorMarker != null) {
                 visitorMarker.remove();
+                mBearingProvider.stop();
+                visitorMarker = null;
+            }
             visitorMarker = map.addMarker(new MarkerOptions().position(myPoint.getCoordinates()));
             visitorMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.arrow_green));
-//            visitorMarker.setRotation((float) angleRotation);
-            //mListener.getRotationMarker(visitorMarker);
+            mBearingProvider.start();
             if(visitedMarker!=null) {
                 visitedMarker.remove();
-                mBearingProvider.stop();
+                visitedMarker = null;
             }
             visitedMarker = map.addMarker(new MarkerOptions().position(visitedPoint.getCoordinates()));
-            mBearingProvider.start();
+
             if(optionOfRadioButton == OPTION_FIND_PERSON){
                 visitedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.raw.goal));
             }else{
@@ -144,8 +150,13 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
             }
         }
         drawPath();
+        //mBearingProvider.stop();
         //json
-        Toast.makeText(context,"Orientacion:"+orientation, Toast.LENGTH_SHORT).show();
+        //LatLng init = ubications.get(0);
+        //LatLng second = ubications.get(1);
+        // taskOrientation = (AsyncOrientationTask) new AsyncOrientationTask(context).execute(init,second,angleRotation);
+        //Toast.makeText(context,"Orientacion:"+orientation, Toast.LENGTH_SHORT).show();
+        //mBearingProvider.stop();
         this.cancel(true);
     }
 
@@ -291,28 +302,9 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
             Log.i("Null Path"," Error in path");
         }else{
             ubications = getShortestPathFromJSON(jsonResponseDijsktra);
-            if(ubications.size()>1){
-                LatLng init = ubications.get(0);
-                LatLng second = ubications.get(1);
-                JSONObject jsonObject =createJSONTracking(init, second);
-                Log.i("JSON POINTS",jsonObject.toString());
-                HttpHandler httpRequest = new HttpHandler();
-                String orientationResponse = httpRequest.postJSON(jsonObject,Constants.URL_GET_ORIENTATION);
-                try {
-                    JSONObject responseOrientation = new JSONObject(orientationResponse);
-                    responseOrientation.get("instruction");
-                    if(orientation == null){
-                        orientation = orientationResponse;
-                    }else{
-                        if(!orientation.equals(orientationResponse)){
-                            //Show orientation to the user
-                            orientation = orientationResponse;
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.i("Orientation",orientation);
+            if(ubications.size()>1) {
+                init = ubications.get(0);
+                second = ubications.get(1);
             }
         }
     }
@@ -365,7 +357,7 @@ public class AsyncMapTask extends AsyncTask<Object,Void,ArrayList<Object>> imple
             obj.put("pointB", goal.latitude);
             obj.accumulate("pointB", goal.longitude);
             obj.put("angle",angleRotation);
-            Log.i("Rotation JSON",""+angleRotation);
+            //Log.i("Rotation JSON",""+angleRotation);
         } catch (JSONException e) {
             e.printStackTrace();
         }
