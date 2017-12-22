@@ -74,7 +74,7 @@ def get_current_graph():
     return resultado
 
 
-#Return if is successfull storage the list of people online, otherwise storing a empty list
+#Return if is successfull storage the list of people online, otherwise storing an empty list
 @app.route('/push_message',methods=['POST'])
 def push_message():
     global MESSAGE
